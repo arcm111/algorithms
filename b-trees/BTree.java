@@ -1,6 +1,6 @@
 /**
  * {@code BTree} is a <b>balanced search tree</b> designed to work well
- * on disks; where read and write operations are slow, and widly used in
+ * on disks; where read and write operations are slow. It is widly used in
  * database systems.
  * 
  * <h3>Properties:</h3>
@@ -232,6 +232,7 @@ public class BTree<T extends Comparable<T>, V> {
                 println("Delete failed: Key was not found " + k);
                 return false;
             }
+
             Node<T, V> y = x.child(i);
             if (y.n <= MIN_DEGREE - 1) {
                 // if the child we recursed to has less than t keys, we
@@ -452,6 +453,9 @@ public class BTree<T extends Comparable<T>, V> {
         return builder.toString();
     }
 
+    /**
+     * Unit Testing.
+     */
     public static void main(String[] args) {
         BTree<String, String> st = new BTree<String, String>(4); 
         //st.put("www.cs.princeton.edu", "128.112.136.12");
