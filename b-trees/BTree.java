@@ -149,10 +149,13 @@ public class BTree<T extends Comparable<T>, V> {
                 x.n--;
                 println("Deleted: " + x.toString());
             } else {
-                // Otherwise, check left and right children of the key
-                // we borrow a key from right or left child to fill the
-                // gap created after deleting the key k located between them
+                // Otherwise, if x is not a leaf then we can not just delete
+                // the key k, because that would leave an extra child in x
+                // (left and right siblings of k).
+                // To avoid this we replace the deleted key with either the
+                // predecessor or the successor of k.
                 println("x is not a leaf");
+                // y is the child of node x left to the founded key k
                 Node<T, V> y = x.child(i);
                 if (y.n >= MIN_DEGREE) {
                     // if left child has at least t - 1 keys, replace k with
@@ -163,9 +166,11 @@ public class BTree<T extends Comparable<T>, V> {
                     x.n--;
                     println("Deleted: " + x.toString());
                 } else {
+                    // else if left child has less than t keys, we check the
+                    // child of x right to the founded key k
                     Node<T, V> z = x.child(i + 1);
                     if (z.n >= MIN_DEGREE) {
-                        // otherwise if the right child has at least t - 1 keys
+                        // if the right child has at least t - 1 keys
                         // replace k with its successor
                         Key<T, V> successor = extractSuccessor(x, i + 1);
                         println("Replacing k with successor " + successor.key); 
@@ -173,99 +178,106 @@ public class BTree<T extends Comparable<T>, V> {
                         x.n--;
                         println("Deleted: " + x.toString());
                     } else {
-                        // if both left and right children has less than t - 1
-                        // keys then merge these children
-                        println("both y and z has less than t - 1, merging...");
+                        // if both left and right children has less than t
+                        // keys, then merge these children along with key k
+                        println("both y and z has < t keys, merging...");
                         mergeChildren(x, i, i + 1);
+                        // after merge, delete the key k from the new node y
                         if (deleteNonEmpty(y, k)) {
                             println("Deleted: " + x.toString());
-                        } else {
-                            return false;
                         }
+                        else return false;
                     }
                 }
             }
         } else {
-            // else if key k was not found in node x, recurse.
-            if (!x.isLeaf) {
-                // k is greater than x[i] child so we recurse to
-                // the child x[i + 1] to the right of k
-                Node<T, V> y = x.child(i);
-                if (y.n <= MIN_DEGREE - 1) {
-                    if (i - 1 >= 0 && x.child(i - 1).n >= MIN_DEGREE) {
-                        int j = i - 1;
-                        // if left child of y exists then the parent key
-                        // is the one to the left of k
-                        Key parentKey = x.key(j);
-                        Node<T, V> z = x.child(j);
-                        println("x before swap: " + x.toString());
-                        println("y before swap: " + y.toString());
-                        println("z before swap: " + z.toString());
-                        println("Swapping with left sibling: " + j);
-                        Key siblingKey = z.key(z.n - 1);
-                        Node<T, V> siblingChild = z.child(z.n);
-                        z.setKey(z.n - 1, null);
-                        z.setChild(z.n, null);
-                        z.n--;
-                        print("Swapping parent key: " + parentKey.key);
-                        println(" with sibling key: " + siblingKey.key);
-                        x.setKey(j, siblingKey);
-                        // shift all keys of y one step to right to make 
-                        // room for the parent key to be added at beginning
-                        rightShiftKeys(y);
-                        // shift all children of y one step to right to make 
-                        // room for the sibling child to be added at beginning
-                        rightShiftChildren(y);
-                        y.n++;
-                        println("Right shifted: " + y.toString());
-                        y.setKey(0, parentKey);
-                        y.setChild(0, siblingChild);
-                        println("x after swap: " + x.toString());
-                        println("y after swap: " + y.toString());
-                        println("z after swap: " + z.toString());
-                    } else if (i + 1 < x.n && x.child(i + 1).n >= MIN_DEGREE) {
-                        int j = i + 1;
-                        println("Swapping with right sibling: " + j);
-                        Key parentKey = x.key(i);
-                        Node<T, V> z = x.child(j);
-                        Key siblingKey = z.key(0);
-                        Node<T, V> siblingChild = z.child(0);
-                        // shift all keys of z one step to left
-                        // after extracting the first key to fill the gap
-                        leftShiftKeys(z);
-                        // shift all children of z one step to left
-                        // after extracting the first child to fill the gap
-                        leftShiftChildren(z);
-                        z.n--;
-                        print("Swapping parent key: " + parentKey.key);
-                        println(" with sibling key: " + siblingKey.key);
-                        x.setKey(i, siblingKey);
-                        y.setKey(y.n, parentKey);
-                        y.setChild(y.n + 1, siblingChild);
-                        y.n++;
-                    } else {
-                        if (i - 1 >= 0) {
-                            mergeChildren(x, i - 1, i);
-                            // the key to detele is not in the left sibling
-                            // after merging y with left child z = x[i - 1]
-                            i--;
-                            println("After merge: " + x.toString());
-                        } else if (i + 1 < x.n) {
-                            mergeChildren(x, i, i + 1);
-                        } else {
-                            println("ERROR: x has only one child!");
-                            return false;
-                        }
-                    }
-                }
-                println("Recursting to x[" + i + "] child ...");
-                return deleteNonEmpty(x.child(i), k);
-            } else {
+            // else if key k was not found in node x, recurse to the
+            // appropriate child.
+            if (x.isLeaf) {
                 // if x is a leaf then k is not in the tree because
                 // x has no children
                 println("Delete failed: Key was not found " + k);
                 return false;
             }
+            Node<T, V> y = x.child(i);
+            if (y.n <= MIN_DEGREE - 1) {
+                // if the child we recursed to has less than t keys, we
+                // borrow a key from an immediate sibling and swap it
+                // with the parent key
+                if (i - 1 >= 0 && x.child(i - 1).n >= MIN_DEGREE) {
+                    // first we try the left child
+                    int j = i - 1;
+                    // if left child of y exists then the parent key
+                    // is the one to the left of k at x[i - 1]
+                    Key parentKey = x.key(j);
+                    Node<T, V> z = x.child(j);
+                    println("x before swap: " + x.toString());
+                    println("y before swap: " + y.toString());
+                    println("z before swap: " + z.toString());
+                    println("Swapping with left sibling: " + j);
+                    Key siblingKey = z.key(z.n - 1);
+                    Node<T, V> siblingChild = z.child(z.n);
+                    z.setKey(z.n - 1, null);
+                    z.setChild(z.n, null);
+                    z.n--;
+                    print("Swapping parent key: " + parentKey.key);
+                    println(" with sibling key: " + siblingKey.key);
+                    x.setKey(j, siblingKey);
+                    // shift all keys of y one step to right to make 
+                    // room for the parent key to be added at beginning
+                    rightShiftKeys(y);
+                    // shift all children of y one step to right to make 
+                    // room for the sibling child to be added at beginning
+                    rightShiftChildren(y);
+                    y.n++;
+                    println("Right shifted: " + y.toString());
+                    y.setKey(0, parentKey);
+                    y.setChild(0, siblingChild);
+                    println("x after swap: " + x.toString());
+                    println("y after swap: " + y.toString());
+                    println("z after swap: " + z.toString());
+                } else if (i + 1 < x.n && x.child(i + 1).n >= MIN_DEGREE) {
+                    // if the left child does not exist or has less than t
+                    // keys, we borrow from the right child
+                    int j = i + 1;
+                    println("Swapping with right sibling: " + j);
+                    Key parentKey = x.key(i);
+                    Node<T, V> z = x.child(j);
+                    Key siblingKey = z.key(0);
+                    Node<T, V> siblingChild = z.child(0);
+                    // shift all keys of z one step to left
+                    // after extracting the first key to fill the gap
+                    leftShiftKeys(z);
+                    // shift all children of z one step to left
+                    // after extracting the first child to fill the gap
+                    leftShiftChildren(z);
+                    z.n--;
+                    print("Swapping parent key: " + parentKey.key);
+                    println(" with sibling key: " + siblingKey.key);
+                    x.setKey(i, siblingKey);
+                    y.setKey(y.n, parentKey);
+                    y.setChild(y.n + 1, siblingChild);
+                    y.n++;
+                } else {
+                    // if both left and right immediate siblings has less 
+                    // than t keys then we can not borrow from them and we
+                    // have to merge with either sibling
+                    if (i - 1 >= 0) {
+                        mergeChildren(x, i - 1, i);
+                        // the key to detele is not in the left sibling
+                        // after merging y with left child z = x[i - 1]
+                        i--;
+                        println("After merge: " + x.toString());
+                    } else if (i + 1 <= x.n) {
+                        mergeChildren(x, i, i + 1);
+                    } else {
+                        println("ERROR: x has only one child!");
+                        return false;
+                    }
+                }
+            }
+            println("Recursting to x[" + i + "] child ...");
+            return deleteNonEmpty(x.child(i), k);
         }
         return true;
     }
