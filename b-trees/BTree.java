@@ -3,7 +3,7 @@
  * on disks; where read and write operations are slow, and widly used in
  * database systems.
  * 
- * <h3><b>Properties:</b></h3>
+ * <h3>Properties:</h3>
  * - B-Trees has a <b>minimum degree</b> {@code t} which specifies the 
  *   branching factor of the tree and the minimum and maximum number of
  *   keys and children that can be stored in each node.
@@ -17,7 +17,7 @@
  *   root, which happens after merging its last key with its last 2 children.
  * - Unlike binary search trees, the hight increases from the top in B-Tree.
  *
- * <h3><b>Rules:</b></h3>
+ * <h3>Rules:</h3>
  * - When inserting a new key to a node that has {@code 2t - 1} keys,
  *   we split that node into two nodes with {@code t - 1} keys each and move the
  *   median key up to its parent.
