@@ -1,3 +1,40 @@
+/**
+ * {@code BTree} is a <b>balanced search tree</b> designed to work well
+ * on disks; where read and write operations are slow, and widly used in
+ * database systems.
+ * 
+ * <h3><b>Properties:</b></h3>
+ * - B-Trees has a <b>minimum degree</b> {@code t} which specifies the 
+ *   branching factor of the tree and the minimum and maximum number of
+ *   keys and children that can be stored in each node.
+ * - Each node has at least {@code n = t - 1} keys and {@code t} children.
+ * - Each node has at most {@code n = 2t - 1} keys and {@code 2t} children.
+ * - The root node is allowed to have less than {@code t - 1} nodes.
+ * - All leaves have the same depth equals to the height of the tree.
+ * - Leaf nodes has no children.
+ * - The <b>height</b> of the tree increases only after splitting the root.
+ * - The <b>height</b> of the tree decreases only after removing all keys from
+ *   root, which happens after merging its last key with its last 2 children.
+ * - Unlike binary search trees, the hight increases from the top in B-Tree.
+ *
+ * <h3><b>Rules:</b></h3>
+ * - When inserting a new key to a node that has {@code 2t - 1} keys,
+ *   we split that node into two nodes with {@code t - 1} keys each and move the
+ *   median key up to its parent.
+ * - Splitting is performed preemptively while recursing down the tree while 
+ *   searching for the place where the new node will be inserted.
+ * - When deleting a key from a node with more than {@code t - 1} keys, the
+ *   lost key violates the structure of the node if left empty because there
+ *   would be {@code n + 2} children instead of {@code n + 1} in the node. So
+ *   to maintain the B-Tree properties we replace the deleted key with either
+ *   the predecessor or successor key.
+ * - When deleting from a node that has less than {@code t} keys, the key
+ *   must be replaced by either borrowing a key from a neighbour sibling or 
+ *   merging with one of them if both siblings has lest than {@code t} keys.
+ * - In the delete procedure we can not descend to a node that has less than
+ *   {@code t} keys. We fix first by (swapping/borrowing/replacing/merging)
+ *   first, then we descend.
+ */
 public class BTree<T extends Comparable<T>, V> {
     private final int MIN_DEGREE; // the minimum degree of the tree t
     private Node<T, V> root; // the root node of the tree
@@ -264,8 +301,10 @@ public class BTree<T extends Comparable<T>, V> {
                     // have to merge with either sibling
                     if (i - 1 >= 0) {
                         mergeChildren(x, i - 1, i);
-                        // the key to detele is not in the left sibling
-                        // after merging y with left child z = x[i - 1]
+                        // the key to detele is now in the left sibling
+                        // after merging y with left child z = x[i - 1],
+                        // we decrement i so that we can recurse to the right
+                        // child.
                         i--;
                         println("After merge: " + x.toString());
                     } else if (i + 1 <= x.n) {
