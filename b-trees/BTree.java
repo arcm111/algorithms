@@ -171,6 +171,7 @@ public class BTree<T extends Comparable<T>, V> {
     private boolean deleteNonEmpty(Node<T, V> x, T k) {
         println("Deleting[" + k + "]: " + x.toString());
         int i = 0;
+        // Locate the index x[i] of the smallest key that is >= k
         while (i < x.n && greater(k, x.key(i))) {
             i++;
         }
@@ -185,47 +186,42 @@ public class BTree<T extends Comparable<T>, V> {
                 leftShiftKeys(x, i);
                 x.n--;
                 println("Deleted: " + x.toString());
+                return true;
+            }
+            // Otherwise, if x is not a leaf then we can not just delete
+            // the key k, because that would leave an extra child in x
+            // (left and right siblings of k).
+            // To avoid this we replace the deleted key with either the
+            // predecessor or the successor of k.
+            println("x is not a leaf");
+            // y is the child of node x left to the founded key k
+            if (x.child(i).n >= MIN_DEGREE) {
+                // if left child has at least t - 1 keys, replace k with
+                // its predecessor
+                Key<T, V> predecessor = extractPredecessor(x, i);
+                println("Replacing k with predecessor " + predecessor.key); 
+                x.setKey(i, predecessor);
+                x.n--;
+                println("Deleted: " + x.toString());
+            } else if (x.child(i + 1).n >= MIN_DEGREE) {
+                // if the right child has at least t - 1 keys
+                // replace k with its successor
+                Key<T, V> successor = extractSuccessor(x, i + 1);
+                println("Replacing k with successor " + successor.key); 
+                x.setKey(i, successor);
+                x.n--;
+                println("Deleted: " + x.toString());
             } else {
-                // Otherwise, if x is not a leaf then we can not just delete
-                // the key k, because that would leave an extra child in x
-                // (left and right siblings of k).
-                // To avoid this we replace the deleted key with either the
-                // predecessor or the successor of k.
-                println("x is not a leaf");
-                // y is the child of node x left to the founded key k
-                Node<T, V> y = x.child(i);
-                if (y.n >= MIN_DEGREE) {
-                    // if left child has at least t - 1 keys, replace k with
-                    // its predecessor
-                    Key<T, V> predecessor = extractPredecessor(x, i);
-                    println("Replacing k with predecessor " + predecessor.key); 
-                    x.setKey(i, predecessor);
-                    x.n--;
+                // if both left and right children has less than t
+                // keys, then merge these children along with key k
+                println("left and right children has < t keys, merging...");
+                mergeChildren(x, i, i + 1);
+                // after merge, delete the key k from the new node; which is
+                // the left child now
+                if (deleteNonEmpty(x.child(i), k)) {
                     println("Deleted: " + x.toString());
-                } else {
-                    // else if left child has less than t keys, we check the
-                    // child of x right to the founded key k
-                    Node<T, V> z = x.child(i + 1);
-                    if (z.n >= MIN_DEGREE) {
-                        // if the right child has at least t - 1 keys
-                        // replace k with its successor
-                        Key<T, V> successor = extractSuccessor(x, i + 1);
-                        println("Replacing k with successor " + successor.key); 
-                        x.setKey(i, successor);
-                        x.n--;
-                        println("Deleted: " + x.toString());
-                    } else {
-                        // if both left and right children has less than t
-                        // keys, then merge these children along with key k
-                        println("both y and z has < t keys, merging...");
-                        mergeChildren(x, i, i + 1);
-                        // after merge, delete the key k from the new node y
-                        if (deleteNonEmpty(y, k)) {
-                            println("Deleted: " + x.toString());
-                        }
-                        else return false;
-                    }
                 }
+                else return false;
             }
         } else {
             // else if key k was not found in node x, recurse to the
