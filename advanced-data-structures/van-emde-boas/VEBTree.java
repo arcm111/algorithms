@@ -14,7 +14,7 @@ import java.util.ArrayList;
  * vEB tree in the cluster array to choose and the latter tells us where to
  * store the element in that cluster.
  * The height of the tree is lglgu and the branching factor at each level is
- * sqrt(u).
+ * square root of the universe size of the previous level.
  * The minimum element of each vEB tree is stored in {@code min} which does
  * not appear in any of the vEB trees that the cluster array points to.
  * Space requirement is O(u).
