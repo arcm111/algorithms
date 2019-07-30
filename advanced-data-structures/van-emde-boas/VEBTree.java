@@ -1,6 +1,24 @@
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * Van-Emde-Boas Tree.
+ * van-Emde-Boas trees support priority-queue operations (INSERT, REMOVE)
+ * and few other dynamic-set operations (SUCCESSOR, PREDECESSOR, MEMBER) in
+ * O(lglgu) worst-case running time, where u is the universe size.
+ * However, the keys must be integers ranging from 0 to u - 1, and 
+ * duplicates keys are not allowed.
+ * To store an element in a vEB tree, it is broken into most significant
+ * bits {@code high(x)} and least significant bits {@code low(x)} in 
+ * terms of universe size u of that tree. The former tells us which
+ * vEB tree in the cluster array to choose and the latter tells us where to
+ * store the element in that cluster.
+ * The height of the tree is lglgu and the branching factor at each level is
+ * sqrt(u).
+ * The minimum element of each vEB tree is stored in {@code min} which does
+ * not appear in any of the vEB trees that the cluster array points to.
+ * Space requirement is O(u).
+ */
 public class VEBTree {
     public static final int NIL = -1;
     private final VEBNode root;
