@@ -40,6 +40,11 @@ public class DisjointSetForests {
         }
     }
 
+    /**
+     * Creates an empty set containing only one node x as the root.
+     * @param x the set representitive.
+     * @throws IllegalArgumentException if x in not valid node.
+     */
     public void makeSet(int x) {
         if (!isValidNode(x)) {
             throw new IllegalArgumentException(x + " is out of bounds " + n);
@@ -51,6 +56,13 @@ public class DisjointSetForests {
         nodes[x] = v;
     }
 
+    /**
+     * Links two tree sets together by adding the tree with the lower
+     * rank as a child of the tree with higher rank.
+     * If both trees have equal ranks, increment the rank of the parent tree.
+     * @param rootX the root of the first tree.
+     * @param rootY the root of the second tree.
+     */
     private void link(int rootX, int rootY) {
         Node x = nodes[rootX];
         Node y = nodes[rootY];
@@ -64,6 +76,12 @@ public class DisjointSetForests {
         }
     }
 
+    /**
+     * Merges two sets into one by linking their roots together.
+     * @param x a member of the first set.
+     * @param y a member of the second set.
+     * @throws IllegalArgumentException if rootX or rootY are invalid nodes.
+     */
     public void union(int x, int y) {
         if (!isValidNode(x)) {
             throw new IllegalArgumentException(x + " is out of bound " + n);
@@ -78,6 +96,11 @@ public class DisjointSetForests {
         }
     }
 
+    /**
+     * Finds the representitive root of a tree set.
+     * @param ind a member of the set to fin its root.
+     * @throws IllegalArgumentException if ind is an invalid nodes.
+     */
     public int findSet(int ind) {
         if (!isValidNode(ind)) {
             throw new IllegalArgumentException(ind + " is out of bounds " + n);
@@ -90,6 +113,12 @@ public class DisjointSetForests {
         return x.p;
     }
 
+    /**
+     * Tests if two nodes are within the same set.
+     * @param x the first node.
+     * @param y the second node.
+     * @throws IllegalArgumentException if x or y are invalid nodes.
+     */
     public boolean isConnected(int x, int y) {
         if (!isValidNode(x)) {
             throw new IllegalArgumentException(x + " is out of bound " + n);
@@ -100,6 +129,11 @@ public class DisjointSetForests {
         return findSet(x) == findSet(y);
     }
 
+    /**
+     * Tests if a node is valid.
+     * A valid node should be greater than 0 and less than n.
+     * @param x the node to be tested.
+     */
     private boolean isValidNode(int x) {
         return x >= 0 && x < n;
     }
