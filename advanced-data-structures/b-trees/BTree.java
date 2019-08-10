@@ -52,7 +52,6 @@ public class BTree<T extends Comparable<T>, V> {
 
     /**
      * Searches for a key within the tree rooted at x.
-     *
      * @param	x	the node to search in for the key k.
      * @param	k	the key to search for.
      */
@@ -80,8 +79,8 @@ public class BTree<T extends Comparable<T>, V> {
      * If the root is full then create a new empty node as the new root and
      * make the old root its child and split.
      */
-    private void insert(Key k) {
-        Node r = root;
+    private void insert(Key<T, V> k) {
+        Node<T, V> r = root;
         if (r.n == 2 * MIN_DEGREE - 1) {
             Node<T, V> s = new Node<>(MIN_DEGREE);
             this.root = s;
@@ -95,7 +94,7 @@ public class BTree<T extends Comparable<T>, V> {
         }
     }
 
-    public void insertNonfull(Node x, Key k) {
+    public void insertNonfull(Node<T, V> x, Key<T, V> k) {
         int i = x.n - 1;
         if (x.isLeaf) {
             while (i >= 0 && k.lessThan(x.key(i))) {
@@ -123,7 +122,7 @@ public class BTree<T extends Comparable<T>, V> {
      * Split a full child that has 2t-1 nodes to two t-1 children
      * and move the middle (t)th key up to its parent
      */
-    private void splitChild(Node x, int i) {
+    private void splitChild(Node<T, V> x, int i) {
         //println(String.format("Splitting (%d) child of x[%d] ...", i, n));
         //println("x[i]: " + x.child(i).toString());
         Node<T, V> z = new Node<>(MIN_DEGREE);
@@ -243,13 +242,13 @@ public class BTree<T extends Comparable<T>, V> {
                     int j = i - 1;
                     // if left child of y exists then the parent key
                     // is the one to the left of k at x[i - 1]
-                    Key parentKey = x.key(j);
+                    Key<T, V> parentKey = x.key(j);
                     Node<T, V> z = x.child(j);
                     println("x before swap: " + x.toString());
                     println("y before swap: " + y.toString());
                     println("z before swap: " + z.toString());
                     println("Swapping with left sibling: " + j);
-                    Key siblingKey = z.key(z.n - 1);
+                    Key<T, V> siblingKey = z.key(z.n - 1);
                     Node<T, V> siblingChild = z.child(z.n);
                     z.setKey(z.n - 1, null);
                     z.setChild(z.n, null);
@@ -275,9 +274,9 @@ public class BTree<T extends Comparable<T>, V> {
                     // keys, we borrow from the right child
                     int j = i + 1;
                     println("Swapping with right sibling: " + j);
-                    Key parentKey = x.key(i);
+                    Key<T, V> parentKey = x.key(i);
                     Node<T, V> z = x.child(j);
-                    Key siblingKey = z.key(0);
+                    Key<T, V> siblingKey = z.key(0);
                     Node<T, V> siblingChild = z.child(0);
                     // shift all keys of z one step to left
                     // after extracting the first key to fill the gap
@@ -324,7 +323,7 @@ public class BTree<T extends Comparable<T>, V> {
         Node<T, V> z = x.child(j);
         println(y.toString());
         println(z.toString());
-        Key k = x.key(i);
+        Key<T, V> k = x.key(i);
         int m = y.n;
         // add k to y keys
         y.setKey(m, k);

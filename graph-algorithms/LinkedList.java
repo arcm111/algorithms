@@ -6,18 +6,9 @@ import java.util.Iterator;
  * Iterable interface is used to provide an Iterator for foreach which
  * iterate over all elements in the linked list.
  */
-public class LinkedList implements Iterable<Integer> {
-    private Node first; // the head of the linked-list
-    private int n; // the number of element in the linked-list
-
-    /**
-     * Constructor.
-     * Initialize an empty linked-list with 0 elements.
-     */
-    public LinkedList() {
-        this.first = null;
-        this.n = 0;
-    }
+public class LinkedList<T> implements Iterable<T> {
+    private Node<T> first = null; // the head of the linked-list
+    private int n = 0; // the number of element in the linked-list
 
     /**
      * Gets the size of the linked-list.
@@ -31,8 +22,8 @@ public class LinkedList implements Iterable<Integer> {
      * Adds a new element to the linked-list.
      * @param w the new element to be added.
      */
-    public void add(int w) {
-        Node cur = new Node(w);
+    public void add(T w) {
+        Node<T> cur = new Node<>(w);
         cur.next = first;
         this.first = cur;
         this.n++;
@@ -41,8 +32,8 @@ public class LinkedList implements Iterable<Integer> {
     /**
      * Provide an iterator which iterates over the elements in the list.
      */
-    public Iterator<Integer> iterator() {
-        return new LinkedListIterator(first);
+    public Iterator<T> iterator() {
+        return new LinkedListIterator<T>(first);
     }
 
     /**
@@ -50,11 +41,11 @@ public class LinkedList implements Iterable<Integer> {
      * Contains only one pointer that points to the next element in the list.
      * It also contains the value of the stored element in the node.
      */
-    private static class Node {
-        public final int value;
-        public Node next = null;
+    private static class Node<T> {
+        public final T value;
+        public Node<T> next = null;
 
-        public Node(int value) {
+        public Node(T value) {
             this.value = value;
         }
     }
@@ -63,10 +54,10 @@ public class LinkedList implements Iterable<Integer> {
      * An Iterator class for the linked-list.
      * Remove operation is not supported.
      */
-    private class LinkedListIterator implements Iterator<Integer> {
-        private Node cur = null;
+    private class LinkedListIterator<T> implements Iterator<T> {
+        private Node<T> cur = null;
 
-        public LinkedListIterator(Node firstNode) {
+        public LinkedListIterator(Node<T> firstNode) {
             this.cur = firstNode;
         }
 
@@ -74,13 +65,13 @@ public class LinkedList implements Iterable<Integer> {
             return cur != null;
         }
 
-        public Integer next() {
-            int v = cur.value;
+        public T next() {
+            T v = cur.value;
             this.cur = cur.next;
             return v;
         }
 
-        public void remove(int x) {
+        public void remove(T x) {
             throw new UnsupportedOperationException("operation not supported");
         }
     }

@@ -6,7 +6,7 @@
 public class Graph {
     public final int V;
     public int E = 0;
-    public final LinkedList[] adj;
+    public final LinkedList<Integer>[] adj;
 
     /**
      * Constructor.
@@ -15,8 +15,8 @@ public class Graph {
      */
     public Graph(int V) {
         this.V = V;
-        this.adj = new LinkedList[V];
-        for (int i = 0; i < V; i++) adj[i] = new LinkedList();
+        this.adj = (LinkedList<Integer>[]) new LinkedList[V];
+        for (int i = 0; i < V; i++) adj[i] = new LinkedList<Integer>();
     }
 
     /**
