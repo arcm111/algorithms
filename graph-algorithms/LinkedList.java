@@ -2,12 +2,12 @@ import java.util.Iterator;
 
 /**
  * Singly-linked list implementation of the linked-list data structrue.
- * This implementation only support {@code Integer} type of elements.
  * Iterable interface is used to provide an Iterator for foreach which
  * iterate over all elements in the linked list.
  */
 public class LinkedList<T> implements Iterable<T> {
-    private Node<T> first = null; // the head of the linked-list
+    private Node<T> head = null; // the head of the linked-list
+    private Node<T> tail = null; // the tail of the linked-list
     private int n = 0; // the number of element in the linked-list
 
     /**
@@ -24,8 +24,12 @@ public class LinkedList<T> implements Iterable<T> {
      */
     public void add(T w) {
         Node<T> cur = new Node<>(w);
-        cur.next = first;
-        this.first = cur;
+        if (head == null) {
+            this.head = cur;
+        } else {
+            tail.next = cur;
+        }
+        this.tail = cur;
         this.n++;
     }
 
@@ -33,7 +37,7 @@ public class LinkedList<T> implements Iterable<T> {
      * Provide an iterator which iterates over the elements in the list.
      */
     public Iterator<T> iterator() {
-        return new LinkedListIterator<T>(first);
+        return new LinkedListIterator<T>(head);
     }
 
     /**

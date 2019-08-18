@@ -47,7 +47,7 @@ public class Queue<T> {
      */
     public void enqueue(T item) {
         Node<T> oldTail = tail; // queue's old tail.
-        Node<T> tmp = new Node(item);
+        Node<T> tmp = new Node<>(item);
         this.tail = tmp;
         if (isEmpty()) { // queue is empty.
             this.head = tail;
