@@ -18,6 +18,10 @@ public class LinkedList<T> implements Iterable<T> {
         return n;
     }
 
+    public boolean isEmpty() {
+        return head == null;
+    }
+
     /**
      * Adds a new element to the linked-list.
      * @param w the new element to be added.

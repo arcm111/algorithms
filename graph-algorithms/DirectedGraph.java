@@ -5,7 +5,8 @@ import java.util.Arrays;
  * Self-loops are forbidden in undirected graphs. {@code addEdge} prevents
  * adding such cycles.
  */
-public class Graph<T extends VertexInterface> implements GraphInterface<T> {
+public class DirectedGraph <T extends VertexInterface> 
+        implements GraphInterface<T> {
     public final int V;
     public int E = 0;
     public final LinkedList<T>[] adj;
@@ -17,7 +18,7 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
      * @param V the number of vertices in the graph.
      */
     @SuppressWarnings("unchecked")
-    public Graph(int V) {
+    public DirectedGraph(int V) {
         this.V = V;
         this.adj = (LinkedList<T>[]) new LinkedList[V];
         this.vertices = null;
@@ -32,7 +33,7 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
      * @throws Exception if {@code makeInstance} failed.
      */
     @SuppressWarnings("unchecked")
-    public Graph(Class<T> C, int V) {
+    public DirectedGraph(Class<T> C, int V) {
         this.V = V;
         this.adj = (LinkedList<T>[]) new LinkedList[V];
         this.vertices = (T[]) new VertexInterface[V];
@@ -67,19 +68,13 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
      * @param v first vertex of the edge.
      * @param w second vertex of the edge.
      * @throws IllegalArgumentException if either v or w are invalid.
-     * @throws IllegalArgumentException if v equals w to prevent self-loops.
      */
     public void addEdge(T x, T y) {
         int v = x.getVertex();
         int w = y.getVertex();
         validateVertex(v);
         validateVertex(w);
-        if (v == w) {
-            String ex = "self-loops are not allowed " + v + ":" + w;
-            throw new IllegalArgumentException(ex);
-        }
         adj[v].add(y);
-        adj[w].add(x);
         this.E++;
     }
 
@@ -89,8 +84,7 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
      * @param y the index of the second vertex.
      * @throws UnsupportedOperationException if the vertices array is not
      *		   initialized using the second constructor.
-     * @throws IllegalArgumentException if the supplied indexes are not 
-     *		   valid or are equal (thus creating a self loop).
+     * @throws IllegalArgumentException if the supplied indexes are invalid.
      */
     public void addEdge(int x, int y) {
         if (vertices == null) {
@@ -100,12 +94,7 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
         }
         validateVertex(x);
         validateVertex(y);
-        if (x == y) {
-            String ex = "self-loops are not allowed " + x + ":" + y;
-            throw new IllegalArgumentException(ex);
-        }
         adj[x].add(vertices[y]);
-        adj[y].add(vertices[x]);
         this.E++;
     }
 
@@ -162,32 +151,22 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
 
     /**
      * Unit tests.
-     * 0---1  
-     * |  /|\   
-     * | / | 2
-     * |/  |/
-     * 4---3
-     * Above graph should be created with 5 vertices and 7 edges.
      */
     public static void main(String[] args) {
-        Graph<Vertex> graph = new Graph<>(5);
-        graph.addEdge(new Vertex(0), new Vertex(1));
-        graph.addEdge(new Vertex(0), new Vertex(4));
-        graph.addEdge(new Vertex(1), new Vertex(3));
-        graph.addEdge(new Vertex(1), new Vertex(4));
-        graph.addEdge(new Vertex(2), new Vertex(1));
-        graph.addEdge(new Vertex(2), new Vertex(3));
-        graph.addEdge(new Vertex(3), new Vertex(4));
-
-        //Graph<Vertex> graph = new Graph<>(Vertex.class, 5);
-        //graph.addEdge(0, 1);
-        //graph.addEdge(0, 4);
-        //graph.addEdge(1, 3);
-        //graph.addEdge(1, 4);
-        //graph.addEdge(2, 1);
-        //graph.addEdge(2, 3);
-        //graph.addEdge(3, 4);
-
-        System.out.println(graph.toString());
+        // 0->1  2
+        // | ^| /|
+        // v/ vv v
+        // 3<-4  5<>
+        int V = 6;
+        DirectedGraph<DFSVertex> G = new DirectedGraph<>(DFSVertex.class, V);
+        G.addEdge(0, 1);
+        G.addEdge(0, 3);
+        G.addEdge(1, 4);
+        G.addEdge(2, 4);
+        G.addEdge(2, 5);
+        G.addEdge(3, 1);
+        G.addEdge(4, 3);
+        G.addEdge(5, 5);
+        System.out.println(G.toString());
     }
 }

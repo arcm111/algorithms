@@ -40,7 +40,7 @@ public class Queue<T> {
     }
 
     /**
-     * Adds an element to the queue.
+     * Adds a new element to the tail of the queue.
      * If the queue is empty, make head and tail point to the new element.
      * Otherwise, add the new element to the tail of the queue.
      * @param item the item to enqueue.
@@ -58,7 +58,7 @@ public class Queue<T> {
     }
 
     /**
-     * Removes the head from the queue and return its item.
+     * Removes the head element of the queue.
      * If there is only one element in the queue, then make head and tail
      * {@code null}.
      * Otherwise, remove the head and update pointers.
