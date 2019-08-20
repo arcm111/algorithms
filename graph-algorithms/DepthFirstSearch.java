@@ -2,23 +2,20 @@
  * Depth-first-search, a graph searching algorithms which traverses a given
  * graph to obtain structural information.
  *
- * It searches deeper into the graph whenever possible. It discovers edges
+ * <p>It searches deeper into the graph whenever possible. It discovers edges
  * on the most recently discovered vertex v, once all edges of v explored, it
  * backtracks to explore edges of its ancesstor from which it was discovered.
- *
- * It works on directed and undirected graphs.
- *
- * If dfs discoveres a back edge during traversal, the graph is cyclic.
- *
- * Undirected graphs have no "Forward" and no "Cross" edges.
- *
- * While exploring the edge <em>(u, v)</em> the type of the edge is 
+ * <p>It works on directed and undirected graphs.
+ * <p>If dfs discoveres a back edge during traversal, the graph is cyclic.
+ * <p>Undirected graphs have no "Forward" and no "Cross" edges.
+ * <p>While exploring the edge <em>(u, v)</em> the type of the edge is 
  * determined by the colour of <em>v</em>:
- *	1- WHITE: Tree edge.
- *	2- GREY:  Back edge.
- *	3- BLACK: Either Forward or Cross edge.
- *
- * The running time is <em>O(V + E)</em>.
+ * <ul>
+ *	<li>WHITE: Tree edge.
+ * 	<li>GREY:  Back edge.
+ * 	<li>BLACK: Either Forward or Cross edge.
+ * </ul>
+ * <p>The running time is <em>O(V + E)</em>.
  */
 public class DepthFirstSearch {
     // used to record discovery and fininsh times for every vertix.
