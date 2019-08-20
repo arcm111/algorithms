@@ -46,7 +46,7 @@ public class BreadthFirstSearch {
     }
 
     /**
-     * Runs BFS on a graph using a given source.
+     * Runs BFS on a graph using a given source index.
      * @param G the undirected graph.
      * @param T the index of the source vertex.
      * @throws IllegalArgumentException if source is an invalid vertex.
