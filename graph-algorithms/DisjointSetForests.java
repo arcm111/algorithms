@@ -1,18 +1,20 @@
 /**
  * Disjoint Set data structure using forests implementation.
- *
- * <p>A disjoint set data structure maintains a collection of dynamic
+ * A disjoint set data structure maintains a collection of dynamic
  * disjoint sets. Where each set has represensitive which is a member
  * of the set. Each tree in the forest represet a set.
- * <p>Forests implementation of Disjoint-Sets uses a tree where each node
+ *
+ * Forests implementation of Disjoint-Sets uses a tree where each node
  * point to its parent. The root, which is the set representative, is the
  * only nodes that its parent points to itself.
  * Forests implementation by itself is not faster than linked-list
  * implementation, however, with "weight by rank" and "path compression"
  * heuristics it can acheive an optimal running time.
- * <p>Weight-by-rank approach makes the root of the tree with the lower
+ *
+ * Weight-by-rank approach makes the root of the tree with the lower
  * rank points to the tree with the higher rank.
- * <p>Path-compression is also a highly affective approach, it is used during
+ *
+ * Path-compression is also a highly affective approach, it is used during
  * {@code findSet} operations to make each node on the find path points
  * directly to the root.
  */

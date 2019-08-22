@@ -28,6 +28,16 @@ public class DFSVertex implements VertexInterface {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (!(obj instanceof DFSVertex)) return false;
+        if (obj == this) return true;
+        
+        final DFSVertex that = (DFSVertex) obj;
+        return this.v == that.v;
+    }
+
+    @Override
     public int getVertex() {
         return v;
     }

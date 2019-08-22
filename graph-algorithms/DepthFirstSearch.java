@@ -154,10 +154,102 @@ public class DepthFirstSearch {
         return false;
     }
 
+    public static <T extends VertexInterface, E extends GraphInterface<T>>
+            DirectedGraph<DFSVertex> cloneGraph(E G) {
+        DirectedGraph<DFSVertex> DG = 
+            new DirectedGraph<>(DFSVertex.class, G.V());
+        for (T u : G.getVertices()) {
+            for (T v : G.adj(u)) DG.addEdge(u.getVertex(), v.getVertex());
+        }
+        return DG;
+    }
+
+    /**
+     * Check if two vertices are connected within a graph.
+     * <p>It makes a copy and converts the given graph into a 
+     * {@code DirectedGraph} to avoid modifying the original graph.
+     * <p>Running time for making a graph copy is <em>O(V + E)</em> worst
+     * case and the running time to check if the vertices are connected is
+     * also <em>O(V + E)</em> worst case. Therefore, the overall running
+     * time is <em>O(V + E)</em> worst case.
+     * @Return boolean whether there exists a path from x to y.
+     */
+    public static <T extends VertexInterface, E extends GraphInterface<T>>
+            boolean areConnected(E G, int x, int y) {
+        DirectedGraph<DFSVertex> DG = cloneGraph(G);
+        return areConnected(DG, DG.getVertex(x), DG.getVertex(y));
+    }
+
+    /**
+     * Helper method for the above method {@code areConnected}.
+     * <p>It checks if there is a path from the vertex x to vertex y only,
+     * and not the other way around.
+     * <p>Running time <em>O(V + E)</em> worst case.
+     * @param G the graph to perform DFS on.
+     * @param x the first vertex.
+     * @param y the second vertex.
+     */
+    private static <T extends DFSVertex, E extends GraphInterface<T>>
+            boolean areConnected(E G, T x, T y) {
+        Stack<T> stack = new Stack<>();
+        stack.push(x);
+        // each loop here discovers an entire connected component.
+        while (!stack.isEmpty()) {
+            T u = stack.pop();
+            if (u.colour == T.Colour.WHITE) {
+                u.colour = T.Colour.GREY;
+                stack.push(u);
+                for (T v : G.adj(u)) {
+                    if (v.equals(y)) return true;
+                    if (v.colour == T.Colour.WHITE) {
+                        v.pi = u;
+                        stack.push(v);
+                    }
+                }
+            } else if (u.colour == T.Colour.GREY) {
+                u.colour = T.Colour.BLACK;
+            }
+        }
+        return false;
+    }
+
+    public static <T extends VertexInterface> Iterable<T> 
+            topologicalSort(DirectedAcyclicGraph<T> DAG) {
+        LinkedList<T> sorted = new LinkedList<>();
+        DirectedGraph<DFSVertex> G = cloneGraph(DAG);
+        for (DFSVertex s : G.getVertices()) {
+            if (s.colour == DFSVertex.Colour.WHITE) {
+                Stack<DFSVertex> stack = new Stack<>();
+                stack.push(s);
+                while (!stack.isEmpty()) {
+                    DFSVertex u = stack.pop();
+                    if (u.colour == DFSVertex.Colour.WHITE) {
+                        u.colour = DFSVertex.Colour.GREY;
+                        stack.push(u);
+                        for (DFSVertex v : G.adj(u)) {
+                            if (v.colour == DFSVertex.Colour.WHITE) {
+                                v.pi = u;
+                                stack.push(v);
+                            }
+                        }
+                    } else if (u.colour == DFSVertex.Colour.GREY) {
+                        u.colour = DFSVertex.Colour.BLACK;
+                        // once finished with a vertex add it to the
+                        // front of the linked list.
+                        sorted.add(DAG.getVertex(u.getVertex()));
+                    }
+                }
+            }
+        }
+        return sorted;
+    }
+
     /**
      * Unit test.
      */
     public static void main(String[] args) {
+        // Testing dfs process (recursive).
+        //
         // 0->1  2
         // | ^| /|
         // v/ vv v
@@ -179,6 +271,7 @@ public class DepthFirstSearch {
         System.out.println("After dfs:");
         for (DFSVertex v : G.getVertices()) System.out.println(v);
 
+        // Testing dfs processNonRecursive (non-recursive).
         G = new DirectedGraph<>(DFSVertex.class, V);
         G.addEdge(0, 1);
         G.addEdge(0, 3);
@@ -194,6 +287,7 @@ public class DepthFirstSearch {
         System.out.println("After dfs:");
         for (DFSVertex v : G.getVertices()) System.out.println(v);
 
+        // Testing isCyclic.
         G = new DirectedGraph<>(DFSVertex.class, V);
         G.addEdge(0, 1);
         G.addEdge(0, 3);
@@ -207,6 +301,8 @@ public class DepthFirstSearch {
         System.out.print("The graph is: ");
         System.out.println(DepthFirstSearch.isCyclic(G) ? "cyclic" : "acyclic");
 
+        // Testing areConnected.
+        //
         // 0->1  2
         // | /| /|
         // vv vv v
@@ -222,5 +318,72 @@ public class DepthFirstSearch {
         System.out.println(G.toString());
         System.out.print("The graph is: ");
         System.out.println(DepthFirstSearch.isCyclic(G) ? "cyclic" : "acyclic");
+
+        G = new DirectedGraph<>(DFSVertex.class, V);
+        G.addEdge(0, 1);
+        G.addEdge(0, 3);
+        G.addEdge(1, 3);
+        G.addEdge(1, 4);
+        G.addEdge(2, 4);
+        G.addEdge(2, 5);
+        G.addEdge(4, 3);
+        System.out.print("5-->2: ");
+        System.out.println(DepthFirstSearch.areConnected(G, 5, 2) ? "connected"
+            : "not connected");
+
+        G = new DirectedGraph<>(DFSVertex.class, V);
+        G.addEdge(0, 1);
+        G.addEdge(0, 3);
+        G.addEdge(1, 3);
+        G.addEdge(1, 4);
+        G.addEdge(2, 4);
+        G.addEdge(2, 5);
+        G.addEdge(4, 3);
+        System.out.print("2-->4: ");
+        System.out.println(DepthFirstSearch.areConnected(G, 2, 4) ? "connected"
+            : "not connected");
+        System.out.println("Topological sorted: ");
+
+        // Testing Topological sort.
+        //
+        // 0<--1   2-->3   4       [0 = shoes    5 = undershorts] 
+        // ^^      |   |           [1 = socks    6 = pants      ]
+        // | \     |   |           [2 = shirt    7 = belt       ]
+        // |  \    v   v           [3 = tie      8 = jacket     ]
+        // 5-->6-->7<--8           [4 = watch                   ]
+        //
+        // Dag from figure 22.7 p.613 in CLRS book.
+        //
+        // Produces (reversed):
+        // 5-->6-->4-->2-->3-->8-->7-->1-->0
+        // which corresponds to:
+        //
+        //      ___________________________
+        //     | __________________        |
+        //     ||                  V       v
+        // 5-->6   4   2-->3-->8-->7   1-->0
+        // |           |___________^       ^
+        // |_______________________________|
+        //
+        // which is topologically sorted.
+        V = 9;
+        DirectedAcyclicGraph<DFSVertex> DAG = 
+                new DirectedAcyclicGraph<>(DFSVertex.class, V);
+        DAG.addEdge(1, 0);
+        DAG.addEdge(2, 3);
+        DAG.addEdge(2, 7);
+        DAG.addEdge(3, 8);
+        DAG.addEdge(5, 6);
+        DAG.addEdge(5, 0);
+        DAG.addEdge(6, 0);
+        DAG.addEdge(6, 7);
+        DAG.addEdge(8, 7);
+        int i = 0;
+        for (DFSVertex v : topologicalSort(DAG)) {
+            i++;
+            System.out.print(v.getVertex());
+            if (i < V) System.out.print("-->");
+        }
+        System.out.println();
     }
 }

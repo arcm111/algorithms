@@ -1,4 +1,6 @@
 public interface GraphInterface <T extends VertexInterface> {
+    public int V();
+    public int E();
     public Iterable<T> adj(T x);
     public void addEdge(T x, T y);
     public void addEdge(int x, int y);

@@ -1,11 +1,15 @@
 import java.util.Arrays;
 
 /**
- * An undirected unweighted graph implementation using adjacenty-lists.
- * Self-loops are forbidden in undirected graphs. {@code addEdge} prevents
- * adding such cycles.
+ * A directed acyclic graph implementation using adjacency lists.
+ * <p>It throws an exception if adding a new edge creates a cycle or a 
+ * self-loop.
+ * <p>Initialization running time is <em>O(E^2 + EV)</em> because every 
+ * {@code areConnected} takes <em>O(E + V)</em> and we do <em>E</em>
+ * Operations with <em>E</em> increasing from <em>1</em> to <em>E</em>
+ * <em>O(/sum_{i=1}^E (V + i)) = O(E^2 + EV)</em>.
  */
-public class DirectedGraph <T extends VertexInterface> 
+public class DirectedAcyclicGraph<T extends VertexInterface>
         implements GraphInterface<T> {
     public final int V;
     public int E = 0;
@@ -18,7 +22,7 @@ public class DirectedGraph <T extends VertexInterface>
      * @param V the number of vertices in the graph.
      */
     @SuppressWarnings("unchecked")
-    public DirectedGraph(int V) {
+    public DirectedAcyclicGraph(int V) {
         this.V = V;
         this.adj = (LinkedList<T>[]) new LinkedList[V];
         this.vertices = null;
@@ -33,7 +37,7 @@ public class DirectedGraph <T extends VertexInterface>
      * @throws Exception if {@code makeInstance} failed.
      */
     @SuppressWarnings("unchecked")
-    public DirectedGraph(Class<T> C, int V) {
+    public DirectedAcyclicGraph(Class<T> C, int V) {
         this.V = V;
         this.adj = (LinkedList<T>[]) new LinkedList[V];
         this.vertices = (T[]) new VertexInterface[V];
@@ -65,6 +69,13 @@ public class DirectedGraph <T extends VertexInterface>
         return E;
     }
 
+    /**
+     * Creates an instance of the supplied vertex class <em>T</em>.
+     * The vertex index is passed to the constructor of the provided class.
+     * @param c the class of the {@code VertexInterface} implementation class.
+     * @param i the index of the vertex to be instantiated.
+     * @return an instance of <em>T</em> with a vertex index <em>i</em>.
+     */
     private T makeInstance(Class<T> c, int i) throws Exception {
         return c.getDeclaredConstructor(Integer.class).newInstance(i);
     }
@@ -72,6 +83,7 @@ public class DirectedGraph <T extends VertexInterface>
     /**
      * Returns an iterable of the adjacecy vertices of a vertex v.
      * @param v the vertex to get the adjacency list for.
+     * @return the iterable.
      * @throws IllegalArgumentException if v is invalid.
      */
     public Iterable<T> adj(T x) {
@@ -99,7 +111,8 @@ public class DirectedGraph <T extends VertexInterface>
      * @param y the index of the second vertex.
      * @throws UnsupportedOperationException if the vertices array is not
      *		   initialized using the second constructor.
-     * @throws IllegalArgumentException if the supplied indexes are invalid.
+     * @throws IllegalArgumentException if x or y are invalid.
+     * @throws IllegalArgumentException if x equals y.
      */
     public void addEdge(int x, int y) {
         if (vertices == null) {
@@ -109,6 +122,14 @@ public class DirectedGraph <T extends VertexInterface>
         }
         validateVertex(x);
         validateVertex(y);
+        if (x == y) {
+            throw new IllegalArgumentException("self-loops not allowed: " + x);
+        }
+        if (DepthFirstSearch.areConnected(this, y, x)) {
+            String err = "adding edge (%d, %d) will create a cycle";
+            String ex = String.format(err, x, y);
+            throw new IllegalArgumentException(ex);
+        }
         adj[x].add(vertices[y]);
         this.E++;
     }
@@ -128,6 +149,7 @@ public class DirectedGraph <T extends VertexInterface>
     /**
      * Gets the stored vertex at a given index.
      * @param v the index of the vertex to find.
+     * @return the vertex with index v in the vertices array.
      * @throws IllegalArgumentException if the index v is invalid.
      */
     public T getVertex(int v) {
@@ -137,6 +159,7 @@ public class DirectedGraph <T extends VertexInterface>
 
     /**
      * Returns an iterator which iterates over all the stored vertices.
+     * @return an iterable list of the vertices;
      * @throws UnsupportedOperationException if vertices are uninitialized.
      */
     public Iterable<T> getVertices() {
@@ -150,6 +173,7 @@ public class DirectedGraph <T extends VertexInterface>
 
     /**
      * Generates a string representation of the graph.
+     * @Return String the representation.
      */
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -172,8 +196,13 @@ public class DirectedGraph <T extends VertexInterface>
         // | ^| /|
         // v/ vv v
         // 3<-4  5<>
+        //
+        // The following graph contains a cycle which should be detected 
+        // after adding the edge that creates the cycle. If detected, an 
+        // IllegalArgumentException will be thrown.
         int V = 6;
-        DirectedGraph<DFSVertex> G = new DirectedGraph<>(DFSVertex.class, V);
+        DirectedAcyclicGraph<DFSVertex> G =
+                new DirectedAcyclicGraph<>(DFSVertex.class, V);
         G.addEdge(0, 1);
         G.addEdge(0, 3);
         G.addEdge(1, 4);

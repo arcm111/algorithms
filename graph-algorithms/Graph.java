@@ -8,8 +8,8 @@ import java.util.Arrays;
 public class Graph<T extends VertexInterface> implements GraphInterface<T> {
     public final int V;
     public int E = 0;
-    public final LinkedList<T>[] adj;
-    public final T[] vertices;
+    private final LinkedList<T>[] adj;
+    private final T[] vertices;
 
     /**
      * Constructor.
@@ -44,6 +44,24 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
             }
             adj[i] = new LinkedList<T>();
         }
+    }
+
+    /**
+     * Returns the number of vertices in the graph.
+     * @Return V the number of vertices.
+     */
+    @Override
+    public int V() {
+        return V;
+    }
+
+    /**
+     * Returns the number of edges in the graph.
+     * @Return E the number of edges.
+     */
+    @Override
+    public int E() {
+        return E;
     }
 
     private T makeInstance(Class<T> c, int i) throws Exception {
