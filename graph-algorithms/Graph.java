@@ -101,11 +101,6 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
         this.E++;
     }
 
-    private void addNonValidatedEdge(int x, int y) {
-        adj[x].add(vertices[y]);
-        this.E++;
-    }
-
     protected void copyEdges(LinkedList<T>[] adj, int V) {
         if (V != this.V) {
             throw new IllegalArgumentException("V invalid");
@@ -128,13 +123,9 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
      * @return a copy of the graph as {@code Object}.
      */
     public Graph<T> copy() {
-        Graph<T> G = new Graph<>(C, V);
-        for (T u : getVertices()) {
-            for (T v : adj(u)) {
-                addNonValidatedEdge(u.getVertex(), v.getVertex());
-            }
-        }
-        return G;
+        Graph<T> graph = new Graph<>(C, V);
+        graph.copyEdges(adj, V);
+        return graph;
     }
 
     /**
