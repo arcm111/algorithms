@@ -127,14 +127,14 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
      * Returns an immutable copy of the current graph in <em>O(V + E)</em>.
      * @return a copy of the graph as {@code Object}.
      */
-    public Object copy() {
+    public Graph<T> copy() {
         Graph<T> G = new Graph<>(C, V);
         for (T u : getVertices()) {
             for (T v : adj(u)) {
                 addNonValidatedEdge(u.getVertex(), v.getVertex());
             }
         }
-        return (Object) G;
+        return G;
     }
 
     /**

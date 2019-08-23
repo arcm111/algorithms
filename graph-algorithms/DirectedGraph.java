@@ -25,6 +25,7 @@ public class DirectedGraph <T extends VertexInterface> extends Graph<T> {
         this.E++;
     }
 
+    @Override
     public DirectedGraph<T> copy() {
         DirectedGraph<T> graph = new DirectedGraph<>(C, V);
         graph.copyEdges(adj, V);
