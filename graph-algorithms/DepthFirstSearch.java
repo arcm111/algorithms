@@ -11,9 +11,9 @@
  * <p>While exploring the edge <em>(u, v)</em> the type of the edge is 
  * determined by the colour of <em>v</em>:
  * <ul>
- *	<li>WHITE: Tree edge.
- * 	<li>GREY:  Back edge.
- * 	<li>BLACK: Either Forward or Cross edge.
+ *   <li>WHITE: Tree edge.
+ *   <li>GREY:  Back edge.
+ *   <li>BLACK: Either Forward or Cross edge.
  * </ul>
  * <p>The running time is <em>O(V + E)</em>.
  */
@@ -27,7 +27,14 @@ public class DepthFirstSearch {
      */
     public static <T extends DFSVertex, E extends GraphInterface<T>> 
             void process(E G) {
-        // vertices colour and parent(pi) are set to white and nil by default.
+        // reset properties of all vertices in the graph.
+        for (DFSVertex v : G.getVertices()) {
+            v.colour = DFSVertex.Colour.WHITE;
+            v.pi = DFSVertex.NullVertex;
+            v.d = DFSVertex.NIL;
+            v.f = DFSVertex.NIL;
+        }
+        // perform dfs on non-visited vertices.
         time = 0;
         for (T u : G.getVertices()) {
             if (u.colour == T.Colour.WHITE) {
@@ -64,6 +71,14 @@ public class DepthFirstSearch {
      */
     public static <T extends DFSVertex, E extends GraphInterface<T>>
             void processNonRecursive(E G) {
+        // reset properties of all vertices in the graph.
+        for (DFSVertex v : G.getVertices()) {
+            v.colour = DFSVertex.Colour.WHITE;
+            v.pi = DFSVertex.NullVertex;
+            v.d = DFSVertex.NIL;
+            v.f = DFSVertex.NIL;
+        }
+        // perform non-recursive dfs on non-visited vertices.
         time = 0;
         for (T x : G.getVertices()) {
             if (x.colour == T.Colour.WHITE) {
@@ -174,7 +189,7 @@ public class DepthFirstSearch {
      * time is <em>O(V + E)</em> worst case.
      * @Return boolean whether there exists a path from x to y.
      */
-    public static <T extends VertexInterface, E extends GraphInterface<T>>
+    public static <T extends VertexInterface, E extends DirectedGraph<T>>
             boolean areConnected(E G, int x, int y) {
         DirectedGraph<DFSVertex> DG = cloneGraph(G);
         return areConnected(DG, DG.getVertex(x), DG.getVertex(y));
@@ -189,7 +204,7 @@ public class DepthFirstSearch {
      * @param x the first vertex.
      * @param y the second vertex.
      */
-    private static <T extends DFSVertex, E extends GraphInterface<T>>
+    private static <T extends DFSVertex, E extends DirectedGraph<T>>
             boolean areConnected(E G, T x, T y) {
         Stack<T> stack = new Stack<>();
         stack.push(x);
@@ -213,6 +228,14 @@ public class DepthFirstSearch {
         return false;
     }
 
+    /**
+     * Topologically "reversed" sorts a directed acyclic graph dag.
+     * <p>It performs dfs on the graph and every time it finishes a 
+     * vertex it adds that vertex to the front of a linked-list. The resulting
+     * linked-list contains all the graph vertices in a reversed typologically
+     * sorted order.
+     * @param DAG the dag graph to sort.
+     */
     public static <T extends VertexInterface> Iterable<T> 
             topologicalSort(DirectedAcyclicGraph<T> DAG) {
         LinkedList<T> sorted = new LinkedList<>();
@@ -254,16 +277,17 @@ public class DepthFirstSearch {
         // | ^| /|
         // v/ vv v
         // 3<-4  5<>
-        int V = 6;
-        DirectedGraph<DFSVertex> G = new DirectedGraph<>(DFSVertex.class, V);
-        G.addEdge(0, 1);
-        G.addEdge(0, 3);
-        G.addEdge(1, 4);
-        G.addEdge(2, 4);
-        G.addEdge(2, 5);
-        G.addEdge(3, 1);
-        G.addEdge(4, 3);
-        G.addEdge(5, 5);
+        DirectedGraph<DFSVertex> DG = new DirectedGraph<>(DFSVertex.class, 6);
+        DG.addEdge(0, 1);
+        DG.addEdge(0, 3);
+        DG.addEdge(1, 4);
+        DG.addEdge(2, 4);
+        DG.addEdge(2, 5);
+        DG.addEdge(3, 1);
+        DG.addEdge(4, 3);
+        DG.addEdge(5, 5);
+
+        DirectedGraph<DFSVertex> G = DG.copy();
         System.out.println(G.toString());
         System.out.println("Before dfs:");
         for (DFSVertex v : G.getVertices()) System.out.println(v);
@@ -272,77 +296,47 @@ public class DepthFirstSearch {
         for (DFSVertex v : G.getVertices()) System.out.println(v);
 
         // Testing dfs processNonRecursive (non-recursive).
-        G = new DirectedGraph<>(DFSVertex.class, V);
-        G.addEdge(0, 1);
-        G.addEdge(0, 3);
-        G.addEdge(1, 4);
-        G.addEdge(2, 4);
-        G.addEdge(2, 5);
-        G.addEdge(3, 1);
-        G.addEdge(4, 3);
-        G.addEdge(5, 5);
+        G = DG.copy();
         System.out.println("Before dfs:");
         for (DFSVertex v : G.getVertices()) System.out.println(v);
         DepthFirstSearch.processNonRecursive(G);
         System.out.println("After dfs:");
         for (DFSVertex v : G.getVertices()) System.out.println(v);
 
-        // Testing isCyclic.
-        G = new DirectedGraph<>(DFSVertex.class, V);
-        G.addEdge(0, 1);
-        G.addEdge(0, 3);
-        G.addEdge(1, 4);
-        G.addEdge(2, 4);
-        G.addEdge(2, 5);
-        G.addEdge(3, 1);
-        G.addEdge(4, 3);
-        G.addEdge(5, 5);
+        // Testing isCyclic with a cyclic graph.
+        G = DG.copy();
         System.out.println(G.toString());
         System.out.print("The graph is: ");
         System.out.println(DepthFirstSearch.isCyclic(G) ? "cyclic" : "acyclic");
-
-        // Testing areConnected.
+        
+        // Testing isCyclic with acyclic graph.
         //
         // 0->1  2
         // | /| /|
         // vv vv v
         // 3<-4  5
-        G = new DirectedGraph<>(DFSVertex.class, V);
-        G.addEdge(0, 1);
-        G.addEdge(0, 3);
-        G.addEdge(1, 3);
-        G.addEdge(1, 4);
-        G.addEdge(2, 4);
-        G.addEdge(2, 5);
-        G.addEdge(4, 3);
+        DG = new DirectedGraph<>(DFSVertex.class, 6);
+        DG.addEdge(0, 1);
+        DG.addEdge(0, 3);
+        DG.addEdge(1, 3);
+        DG.addEdge(1, 4);
+        DG.addEdge(2, 4);
+        DG.addEdge(2, 5);
+        DG.addEdge(4, 3);
+
+        G = DG.copy();
         System.out.println(G.toString());
         System.out.print("The graph is: ");
         System.out.println(DepthFirstSearch.isCyclic(G) ? "cyclic" : "acyclic");
 
-        G = new DirectedGraph<>(DFSVertex.class, V);
-        G.addEdge(0, 1);
-        G.addEdge(0, 3);
-        G.addEdge(1, 3);
-        G.addEdge(1, 4);
-        G.addEdge(2, 4);
-        G.addEdge(2, 5);
-        G.addEdge(4, 3);
+        // Testing areConnected
+        G = DG.copy();
         System.out.print("5-->2: ");
         System.out.println(DepthFirstSearch.areConnected(G, 5, 2) ? "connected"
             : "not connected");
-
-        G = new DirectedGraph<>(DFSVertex.class, V);
-        G.addEdge(0, 1);
-        G.addEdge(0, 3);
-        G.addEdge(1, 3);
-        G.addEdge(1, 4);
-        G.addEdge(2, 4);
-        G.addEdge(2, 5);
-        G.addEdge(4, 3);
         System.out.print("2-->4: ");
         System.out.println(DepthFirstSearch.areConnected(G, 2, 4) ? "connected"
             : "not connected");
-        System.out.println("Topological sorted: ");
 
         // Testing Topological sort.
         //
@@ -366,9 +360,9 @@ public class DepthFirstSearch {
         // |_______________________________|
         //
         // which is topologically sorted.
-        V = 9;
+        System.out.println("Reversed topological sort: ");
         DirectedAcyclicGraph<DFSVertex> DAG = 
-                new DirectedAcyclicGraph<>(DFSVertex.class, V);
+                new DirectedAcyclicGraph<>(DFSVertex.class, 9);
         DAG.addEdge(1, 0);
         DAG.addEdge(2, 3);
         DAG.addEdge(2, 7);
@@ -382,7 +376,7 @@ public class DepthFirstSearch {
         for (DFSVertex v : topologicalSort(DAG)) {
             i++;
             System.out.print(v.getVertex());
-            if (i < V) System.out.print("-->");
+            if (i < 9) System.out.print("-->");
         }
         System.out.println();
     }

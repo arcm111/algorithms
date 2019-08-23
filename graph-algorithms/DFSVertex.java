@@ -1,8 +1,6 @@
-public class DFSVertex implements VertexInterface {
-    private static final int NIL = -1;
-    private static final DFSVertex NullVertex = new DFSVertex(-1);
-
-    public final int v;
+public class DFSVertex extends Vertex {
+    public static final int NIL = -1;
+    public static final DFSVertex NullVertex = new DFSVertex(-1);
     public Colour colour = Colour.WHITE;
     public DFSVertex pi = NullVertex;
     public int d = NIL;
@@ -24,7 +22,7 @@ public class DFSVertex implements VertexInterface {
      * @param v the vertex value.
      */
     public DFSVertex(Integer v) {
-        this.v = v;
+        super(v);
     }
 
     @Override
@@ -35,11 +33,6 @@ public class DFSVertex implements VertexInterface {
         
         final DFSVertex that = (DFSVertex) obj;
         return this.v == that.v;
-    }
-
-    @Override
-    public int getVertex() {
-        return v;
     }
 
     @Override

@@ -1,9 +1,7 @@
-public class BFSVertex implements VertexInterface {
+public class BFSVertex extends Vertex {
     private static final int NIL = -1;
     private static final int INFINITY = Integer.MAX_VALUE;
     private static final BFSVertex NullVertex = new BFSVertex(-1);
-
-    public final int v;
     public Colour colour = Colour.WHITE;
     public int d = INFINITY;
     public BFSVertex pi = NullVertex;
@@ -24,12 +22,7 @@ public class BFSVertex implements VertexInterface {
      * @param v the vertex value.
      */
     public BFSVertex(Integer v) {
-        this.v = v;
-    }
-
-    @Override
-    public int getVertex() {
-        return v;
+        super(v);
     }
 
     @Override

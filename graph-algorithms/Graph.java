@@ -6,23 +6,11 @@ import java.util.Arrays;
  * adding such cycles.
  */
 public class Graph<T extends VertexInterface> implements GraphInterface<T> {
-    public final int V;
-    public int E = 0;
-    private final LinkedList<T>[] adj;
-    private final T[] vertices;
-
-    /**
-     * Constructor.
-     * Creats an empty adjacency list of all the vertices in the graph.
-     * @param V the number of vertices in the graph.
-     */
-    @SuppressWarnings("unchecked")
-    public Graph(int V) {
-        this.V = V;
-        this.adj = (LinkedList<T>[]) new LinkedList[V];
-        this.vertices = null;
-        for (int i = 0; i < V; i++) adj[i] = new LinkedList<T>();
-    }
+    protected final Class<T> C;
+    protected int V;
+    protected int E = 0;
+    protected LinkedList<T>[] adj;
+    protected T[] vertices;
 
     /**
      * Constructor for initializing the vertices array.
@@ -31,19 +19,37 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
      * @param V the number of vertices in the graph.
      * @throws Exception if {@code makeInstance} failed.
      */
-    @SuppressWarnings("unchecked")
     public Graph(Class<T> C, int V) {
+        this.C = C;
         this.V = V;
-        this.adj = (LinkedList<T>[]) new LinkedList[V];
-        this.vertices = (T[]) new VertexInterface[V];
+        this.vertices = newVerticesArray(V);
+        this.adj = newAdjacencyList(V);
+    }
+
+    @SuppressWarnings("unchecked")
+    private T[] newVerticesArray(int V) {
+        T[] arr = (T[]) new VertexInterface[V];
         for (int i = 0; i < V; i++) {
             try {
-                vertices[i] = makeInstance(C, i);
+                arr[i] = makeInstance(C, i);
             } catch (Exception ex) {
                 System.out.println(ex.toString());
             }
-            adj[i] = new LinkedList<T>();
         }
+        return arr;
+    }
+
+    @SuppressWarnings("unchecked")
+    private LinkedList<T>[] newAdjacencyList(int V) {
+        LinkedList<T>[] adjList = (LinkedList<T>[]) new LinkedList[V];
+        for (int i = 0; i < V; i++) {
+            adjList[i] = new LinkedList<T>();
+        }
+        return adjList;
+    }
+
+    private T makeInstance(Class<T> c, int i) throws Exception {
+        return c.getDeclaredConstructor(Integer.class).newInstance(i);
     }
 
     /**
@@ -64,10 +70,6 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
         return E;
     }
 
-    private T makeInstance(Class<T> c, int i) throws Exception {
-        return c.getDeclaredConstructor(Integer.class).newInstance(i);
-    }
-
     /**
      * Returns an iterable of the adjacecy vertices of a vertex v.
      * @param v the vertex to get the adjacency list for.
@@ -79,43 +81,15 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
         return adj[v];
     }
 
-    /**
-     * Add an edge to the graph.
-     * It is an undirected graph so add edges in both directions.
-     * @param v first vertex of the edge.
-     * @param w second vertex of the edge.
-     * @throws IllegalArgumentException if either v or w are invalid.
-     * @throws IllegalArgumentException if v equals w to prevent self-loops.
-     */
-    public void addEdge(T x, T y) {
-        int v = x.getVertex();
-        int w = y.getVertex();
-        validateVertex(v);
-        validateVertex(w);
-        if (v == w) {
-            String ex = "self-loops are not allowed " + v + ":" + w;
-            throw new IllegalArgumentException(ex);
-        }
-        adj[v].add(y);
-        adj[w].add(x);
-        this.E++;
-    }
 
     /**
      * Adds edges to the adjacency list using indexes of the stored vertices.
      * @param x the index of the first vertex.
      * @param y the index of the second vertex.
-     * @throws UnsupportedOperationException if the vertices array is not
-     *		   initialized using the second constructor.
      * @throws IllegalArgumentException if the supplied indexes are not 
      *		   valid or are equal (thus creating a self loop).
      */
     public void addEdge(int x, int y) {
-        if (vertices == null) {
-            // vertices must be instantiated first before using this
-            // method by passing the T class to the instructor.
-            throw new UnsupportedOperationException("wrong instructor used");
-        }
         validateVertex(x);
         validateVertex(y);
         if (x == y) {
@@ -125,6 +99,59 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
         adj[x].add(vertices[y]);
         adj[y].add(vertices[x]);
         this.E++;
+    }
+
+    private void addNonValidatedEdge(int x, int y) {
+        adj[x].add(vertices[y]);
+        this.E++;
+    }
+
+    protected void copyEdges(LinkedList<T>[] adj, int V) {
+        if (V != this.V) {
+            throw new IllegalArgumentException("V invalid");
+        }
+        this.V = V;
+        this.adj = newAdjacencyList(V);
+        int E = 0;
+        for (int u = 0; u < V; u++) {
+            for (T v : adj[u]) {
+                this.adj[u].add(vertices[v.getVertex()]);
+                E++;
+            }
+        }
+        this.E = E;
+    }
+
+    /**
+     * Clones the graph.
+     * Returns an immutable copy of the current graph in <em>O(V + E)</em>.
+     * @return a copy of the graph as {@code Object}.
+     */
+    public Object copy() {
+        Graph<T> G = new Graph<>(C, V);
+        for (T u : getVertices()) {
+            for (T v : adj(u)) {
+                addNonValidatedEdge(u.getVertex(), v.getVertex());
+            }
+        }
+        return (Object) G;
+    }
+
+    /**
+     * Transposes this graph.
+     * It reverse all edges in the graph.
+     * Takes <em>O(V + E)</em> worst case running time.
+     */
+    public void Transpose() {
+        // create a new adjacency list
+        LinkedList<T>[] newAdj = newAdjacencyList(V);
+        // reverse every edge in the graph and add it to the new list
+        for (T u : getVertices()) {
+            for (T v : adj(u)) {
+                newAdj[v.getVertex()].add(u);
+            }
+        }
+        this.adj = newAdj;
     }
 
     /**
@@ -151,14 +178,9 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
 
     /**
      * Returns an iterator which iterates over all the stored vertices.
-     * @throws UnsupportedOperationException if vertices are uninitialized.
+     * @return vertices array as a {@code List<T>}.
      */
     public Iterable<T> getVertices() {
-        if (vertices == null) {
-            // vertices must be instantiated first before using this
-            // method by passing T class to the constructor.
-            throw new UnsupportedOperationException("wrong instructor used");
-        }
         return Arrays.asList(vertices);
     }
 
@@ -173,7 +195,7 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
             for (T x : adj[v]) {
                 builder.append(x.toString() + " ");
             }
-            builder.append("\n");
+            if (v < V - 1) builder.append("\n");
         }
         return builder.toString();
     }
@@ -188,23 +210,14 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
      * Above graph should be created with 5 vertices and 7 edges.
      */
     public static void main(String[] args) {
-        Graph<Vertex> graph = new Graph<>(5);
-        graph.addEdge(new Vertex(0), new Vertex(1));
-        graph.addEdge(new Vertex(0), new Vertex(4));
-        graph.addEdge(new Vertex(1), new Vertex(3));
-        graph.addEdge(new Vertex(1), new Vertex(4));
-        graph.addEdge(new Vertex(2), new Vertex(1));
-        graph.addEdge(new Vertex(2), new Vertex(3));
-        graph.addEdge(new Vertex(3), new Vertex(4));
-
-        //Graph<Vertex> graph = new Graph<>(Vertex.class, 5);
-        //graph.addEdge(0, 1);
-        //graph.addEdge(0, 4);
-        //graph.addEdge(1, 3);
-        //graph.addEdge(1, 4);
-        //graph.addEdge(2, 1);
-        //graph.addEdge(2, 3);
-        //graph.addEdge(3, 4);
+        Graph<Vertex> graph = new Graph<>(Vertex.class, 5);
+        graph.addEdge(0, 1);
+        graph.addEdge(0, 4);
+        graph.addEdge(1, 3);
+        graph.addEdge(1, 4);
+        graph.addEdge(2, 1);
+        graph.addEdge(2, 3);
+        graph.addEdge(3, 4);
 
         System.out.println(graph.toString());
     }
