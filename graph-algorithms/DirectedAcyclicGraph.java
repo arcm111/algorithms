@@ -39,6 +39,13 @@ public class DirectedAcyclicGraph<T extends VertexInterface>
         this.E++;
     }
 
+    @Override
+    public DirectedAcyclicGraph<T> copy() {
+        DirectedAcyclicGraph<T> graph = new DirectedAcyclicGraph<>(C, V);
+        graph.copyEdges(adj, V);
+        return graph;
+    }
+
     /**
      * Unit tests.
      */

@@ -50,6 +50,11 @@ public class DirectedGraph <T extends VertexInterface> extends Graph<T> {
         G.addEdge(3, 1);
         G.addEdge(4, 3);
         G.addEdge(5, 5);
-        System.out.println(G.toString());
+        System.out.println(G);
+
+        // Testing transpose method
+        System.out.println("G transposed: ");
+        G.transpose();
+        System.out.println(G);
     }
 }

@@ -1,3 +1,7 @@
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Comparator;
+
 /**
  * Depth-first-search, a graph searching algorithms which traverses a given
  * graph to obtain structural information.
@@ -129,7 +133,8 @@ public class DepthFirstSearch {
      * Reverses the order of vertices in the adjacency list.
      * @param itr the {@code LinkedList} iterator to reverse its elements.
      */
-    private static <T extends DFSVertex> Iterable<T> reverse(Iterable<T> itr) {
+    private static <T extends VertexInterface> 
+            Iterable<T> reverse(Iterable<T> itr) {
         Stack<T> stack = new Stack<>();
         for (T item : itr) stack.push(item);
         return stack;
@@ -137,13 +142,15 @@ public class DepthFirstSearch {
 
     /**
      * Detects if a graph is cyclic or acyclic.
-     * The graph is cyclic if it contains a back edge. In other words,
+     * <p>Graph safe operation.
+     * <p>The graph is cyclic if it contains a back edge. In other words,
      * while exploring the edge (u, v), if v is grey, then the edge is
      * a back edge and the graph contains a cycle.
      * @param G the graph to be tested.
      */
     public static <T extends DFSVertex, E extends GraphInterface<T>>
-            boolean isCyclic(E G) {
+            boolean isCyclic(E graph) {
+        GraphInterface<T> G = graph.copy();
         for (T x : G.getVertices()) {
             if (x.colour == T.Colour.WHITE) {
                 Stack<T> stack = new Stack<>();
@@ -181,6 +188,7 @@ public class DepthFirstSearch {
 
     /**
      * Check if two vertices are connected within a graph.
+     * <p>Graph safe operation.
      * <p>It makes a copy and converts the given graph into a 
      * {@code DirectedGraph} to avoid modifying the original graph.
      * <p>Running time for making a graph copy is <em>O(V + E)</em> worst
@@ -229,17 +237,44 @@ public class DepthFirstSearch {
     }
 
     /**
-     * Topologically "reversed" sorts a directed acyclic graph dag.
-     * <p>It performs dfs on the graph and every time it finishes a 
-     * vertex it adds that vertex to the front of a linked-list. The resulting
-     * linked-list contains all the graph vertices in a reversed typologically
-     * sorted order.
+     * Topologically sorts the vertices of a directed acyclic graph dag.
+     * Sorts vertices by finishing time in ascending order.
+     * <p>Graph safe operation.
+     * <p>Running time <em>O(V + E)</em>.
      * @param DAG the dag graph to sort.
+     * @return the sorted vertices as iterable.
      */
-    public static <T extends VertexInterface> Iterable<T> 
-            topologicalSort(DirectedAcyclicGraph<T> DAG) {
+    public static <T extends VertexInterface> 
+            Iterable<T> topologicalSort(DirectedAcyclicGraph<T> DAG) {
+        return sortVerticesByFinishingTimeAsc(DAG);
+    }
+
+    /**
+     * Topologically reverse sorts the vertices of a directed acyclic graph dag.
+     * Sorts vertices by finishing time in descending order.
+     * <p>Graph safe operation.
+     * <p>Running time <em>O(V + E)</em>.
+     * @param DAG the dag graph to sort.
+     * @return the sorted vertices as iterable.
+     */
+    public static <T extends VertexInterface> 
+            Iterable<T> reverseTopologicalSort(DirectedAcyclicGraph<T> DAG) {
+        return sortVerticesByFinishingTimeDesc(DAG);
+    }
+
+    /**
+     * Sorts the vertices of a graph in ascending order of finishing times.
+     * <p>It performs dfs on the graph and every time a vertex is finished 
+     * it is added to the front of a linked-list. The resulting linked-list
+     * contains all the graph vertices in a reversed typologically sorted
+     * order.
+     * @param DG the directed graph to sort.
+     * @return the sorted vertices as iterable.
+     */
+    private static <T extends VertexInterface, E extends DirectedGraph<T>> 
+            Iterable<T> sortVerticesByFinishingTimeDesc(E DG) {
+        DirectedGraph<DFSVertex> G = cloneGraph(DG);
         LinkedList<T> sorted = new LinkedList<>();
-        DirectedGraph<DFSVertex> G = cloneGraph(DAG);
         for (DFSVertex s : G.getVertices()) {
             if (s.colour == DFSVertex.Colour.WHITE) {
                 Stack<DFSVertex> stack = new Stack<>();
@@ -259,7 +294,7 @@ public class DepthFirstSearch {
                         u.colour = DFSVertex.Colour.BLACK;
                         // once finished with a vertex add it to the
                         // front of the linked list.
-                        sorted.add(DAG.getVertex(u.getVertex()));
+                        sorted.addFirst(DG.getVertex(u.getVertex()));
                     }
                 }
             }
@@ -268,11 +303,81 @@ public class DepthFirstSearch {
     }
 
     /**
+     * Sorts the vertices of a graph in descending order of finishing times.
+     * <p>It performs dfs on the graph and every time a vertex is finished 
+     * it is added to the front of a linked-list. The resulting linked-list
+     * contains all the graph vertices in a reversed typologically sorted
+     * order.
+     * @param DG the directed graph to sort.
+     * @return the sorted vertices as iterable.
+     */
+    private static <T extends VertexInterface, E extends DirectedGraph<T>> 
+            Iterable<T> sortVerticesByFinishingTimeAsc(E DG) {
+        return reverse(sortVerticesByFinishingTimeDesc(DG));
+    }
+
+    /**
+     * Finds the strongly-connected-components of a diretce graph.
+     * It runs dfs on the graph and sort vertices by ascending finishing times,
+     * then it transpose the graph and run dfs again but in order of the
+     * sorted vertices. The discovered vertices in every iteration of the 
+     * outer loop represents a component.
+     * @param DG the directed graph to sort.
+     * @return the list of the strongly-connected-components.
+     */
+    public static <T extends VertexInterface, E extends DirectedGraph<T>>
+            List<List<T>> stronglyConnectedComponents(E DG) {
+        // make a copy of original graph to avoid modifying it
+        DirectedGraph<DFSVertex> G = cloneGraph(DG);
+        process(G);
+
+        // sort the vertices by finishing time in descending order
+        Iterable<T> sorted = sortVerticesByFinishingTimeDesc(DG);
+
+        // make another copy and transpose it
+        DirectedGraph<DFSVertex> GT = cloneGraph(DG);
+        GT.transpose();
+
+        // run dfs on the vertices of the transposed graph GT in the order 
+        // of the sorted vertices of the non-transposed graph G.
+        List<List<T>> components = new ArrayList<>();
+        for (T x : sorted) {
+            DFSVertex s = GT.getVertex(x.getVertex());
+            // Each white vertex found here represents a root of a new 
+            // strongly-connected-component tree.
+            if (s.colour == DFSVertex.Colour.WHITE) {
+                List<T> comp = new ArrayList<>();
+                Stack<DFSVertex> stack = new Stack<>();
+                stack.push(s);
+                while (!stack.isEmpty()) {
+                    DFSVertex u = stack.pop();
+                    if (u.colour == DFSVertex.Colour.WHITE) {
+                        u.colour = DFSVertex.Colour.GREY;
+                        stack.push(u);
+                        for (DFSVertex v : GT.adj(u)) {
+                            if (v.colour == DFSVertex.Colour.WHITE) {
+                                v.pi = u;
+                                stack.push(v);
+                            }
+                        }
+                    } else if (u.colour == DFSVertex.Colour.GREY) {
+                        u.colour = DFSVertex.Colour.BLACK;
+                        // each vertex finished here belongs to the same 
+                        // Component tree we discovered above.
+                        comp.add(DG.getVertex(u.getVertex()));
+                    }
+                }
+                // add the fully discovered Component to the components list.
+                components.add(comp);
+            }
+        }
+        return components;
+    }
+
+    /**
      * Unit test.
      */
     public static void main(String[] args) {
-        // Testing dfs process (recursive).
-        //
         // 0->1  2
         // | ^| /|
         // v/ vv v
@@ -287,6 +392,7 @@ public class DepthFirstSearch {
         DG.addEdge(4, 3);
         DG.addEdge(5, 5);
 
+        // Testing dfs process (recursive).
         DirectedGraph<DFSVertex> G = DG.copy();
         System.out.println(G.toString());
         System.out.println("Before dfs:");
@@ -308,29 +414,30 @@ public class DepthFirstSearch {
         System.out.println(G.toString());
         System.out.print("The graph is: ");
         System.out.println(DepthFirstSearch.isCyclic(G) ? "cyclic" : "acyclic");
-        
         // Testing isCyclic with acyclic graph.
         //
         // 0->1  2
         // | /| /|
         // vv vv v
         // 3<-4  5
-        DG = new DirectedGraph<>(DFSVertex.class, 6);
-        DG.addEdge(0, 1);
-        DG.addEdge(0, 3);
-        DG.addEdge(1, 3);
-        DG.addEdge(1, 4);
-        DG.addEdge(2, 4);
-        DG.addEdge(2, 5);
-        DG.addEdge(4, 3);
-
-        G = DG.copy();
+        G = new DirectedGraph<>(DFSVertex.class, 6);
+        G.addEdge(0, 1);
+        G.addEdge(0, 3);
+        G.addEdge(1, 3);
+        G.addEdge(1, 4);
+        G.addEdge(2, 4);
+        G.addEdge(2, 5);
+        G.addEdge(4, 3);
         System.out.println(G.toString());
         System.out.print("The graph is: ");
         System.out.println(DepthFirstSearch.isCyclic(G) ? "cyclic" : "acyclic");
 
         // Testing areConnected
-        G = DG.copy();
+        //
+        // 0->1  2
+        // | /| /|
+        // vv vv v
+        // 3<-4  5
         System.out.print("5-->2: ");
         System.out.println(DepthFirstSearch.areConnected(G, 5, 2) ? "connected"
             : "not connected");
@@ -360,7 +467,6 @@ public class DepthFirstSearch {
         // |_______________________________|
         //
         // which is topologically sorted.
-        System.out.println("Reversed topological sort: ");
         DirectedAcyclicGraph<DFSVertex> DAG = 
                 new DirectedAcyclicGraph<>(DFSVertex.class, 9);
         DAG.addEdge(1, 0);
@@ -372,6 +478,17 @@ public class DepthFirstSearch {
         DAG.addEdge(6, 0);
         DAG.addEdge(6, 7);
         DAG.addEdge(8, 7);
+        DirectedAcyclicGraph<DFSVertex> GC = DAG.copy();
+        process(GC);
+        // Running dfs on GC does not affect topologicalSort operation
+        // because topologicalSort copy the graph edges only and reset
+        // the vertices to default settings in the new graph.
+        System.out.print("Topological-sort sorts vertices by ");
+        System.out.println("finishing-time in descending order:");
+        for (DFSVertex v : topologicalSort(GC)) {
+            System.out.println(v);
+        }
+        System.out.println("Topological sort: ");
         int i = 0;
         for (DFSVertex v : topologicalSort(DAG)) {
             i++;
@@ -379,5 +496,44 @@ public class DepthFirstSearch {
             if (i < 9) System.out.print("-->");
         }
         System.out.println();
+        System.out.println("Reversed topological sort: ");
+        i = 0;
+        for (DFSVertex v : reverseTopologicalSort(DAG)) {
+            i++;
+            System.out.print(v.getVertex());
+            if (i < 9) System.out.print("-->");
+        }
+        System.out.println();
+        // Testing stronglyConnectedComponents
+        // Diagram found in p.616 in CLRS book "Figure 22.9"
+        //
+        // 0-->1-->2<->3       components:
+        // ^  /|   |   |       1- {0, 1, 4}             
+        // | / |   |   |       2- {2, 3}            
+        // |v  v   v   v       3- {5, 6}           
+        // 4-->5<->6-->7<>     4- {7}            
+        DirectedGraph<Vertex> DG2 = new DirectedGraph<>(Vertex.class, 8);
+        DG2.addEdge(0, 1);
+        DG2.addEdge(1, 4);
+        DG2.addEdge(1, 5);
+        DG2.addEdge(1, 2);
+        DG2.addEdge(2, 6);
+        DG2.addEdge(2, 3);
+        DG2.addEdge(3, 2);
+        DG2.addEdge(3, 7);
+        DG2.addEdge(4, 0);
+        DG2.addEdge(4, 5);
+        DG2.addEdge(5, 6);
+        DG2.addEdge(6, 5);
+        DG2.addEdge(6, 7);
+        DG2.addEdge(7, 7);
+        System.out.println("Strongly connected components: ");
+        List<List<Vertex>> components = stronglyConnectedComponents(DG2);
+        System.out.println(DG2);
+        for (List<Vertex> com : components) {
+            System.out.print("Component: ");
+            for (Vertex x : com) System.out.print(x.getVertex() + " ");
+            System.out.println();
+        }
     }
 }

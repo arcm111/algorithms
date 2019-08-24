@@ -23,7 +23,7 @@ public class LinkedList<T> implements Iterable<T> {
     }
 
     /**
-     * Adds a new element to the linked-list.
+     * Adds a new element to the tail of the linked-list.
      * @param w the new element to be added.
      */
     public void add(T w) {
@@ -34,6 +34,24 @@ public class LinkedList<T> implements Iterable<T> {
             tail.next = cur;
         }
         this.tail = cur;
+        this.n++;
+    }
+
+    public void addLast(T w) {
+        add(w);
+    }
+
+    /**
+     * Adds a new element to the head of the linked-list.
+     * @param w the new element to be added.
+     */
+    public void addFirst(T w) {
+        Node<T> cur = new Node<>(w);
+        if (head == null) {
+            this.tail = cur;
+        }
+        cur.next = head;
+        this.head = cur;
         this.n++;
     }
 

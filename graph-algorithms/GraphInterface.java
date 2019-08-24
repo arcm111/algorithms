@@ -7,4 +7,5 @@ public interface GraphInterface <T extends VertexInterface> {
     public T getVertex(int v);
     public Iterable<T> getVertices();
     public String toString();
+    public GraphInterface<T> copy();
 }

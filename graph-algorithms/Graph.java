@@ -133,7 +133,7 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
      * It reverse all edges in the graph.
      * Takes <em>O(V + E)</em> worst case running time.
      */
-    public void Transpose() {
+    public void transpose() {
         // create a new adjacency list
         LinkedList<T>[] newAdj = newAdjacencyList(V);
         // reverse every edge in the graph and add it to the new list
@@ -201,15 +201,14 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
      * Above graph should be created with 5 vertices and 7 edges.
      */
     public static void main(String[] args) {
-        Graph<Vertex> graph = new Graph<>(Vertex.class, 5);
-        graph.addEdge(0, 1);
-        graph.addEdge(0, 4);
-        graph.addEdge(1, 3);
-        graph.addEdge(1, 4);
-        graph.addEdge(2, 1);
-        graph.addEdge(2, 3);
-        graph.addEdge(3, 4);
-
-        System.out.println(graph.toString());
+        Graph<Vertex> G = new Graph<>(Vertex.class, 5);
+        G.addEdge(0, 1);
+        G.addEdge(0, 4);
+        G.addEdge(1, 3);
+        G.addEdge(1, 4);
+        G.addEdge(2, 1);
+        G.addEdge(2, 3);
+        G.addEdge(3, 4);
+        System.out.println(G);
     }
 }
