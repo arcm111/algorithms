@@ -37,6 +37,21 @@ public class LinkedList<T> implements Iterable<T> {
         this.n++;
     }
 
+    /**
+     * Adds a new weighted element to the tail of the linked-list.
+     * @param w the new element to be added.
+     */
+    public void add(T w, int weight) {
+        Node<T> cur = new Node<>(w, weight);
+        if (head == null) {
+            this.head = cur;
+        } else {
+            tail.next = cur;
+        }
+        this.tail = cur;
+        this.n++;
+    }
+
     public void addLast(T w) {
         add(w);
     }
@@ -69,10 +84,17 @@ public class LinkedList<T> implements Iterable<T> {
      */
     private static class Node<T> {
         public final T value;
+        public final int weight;
         public Node<T> next = null;
 
         public Node(T value) {
             this.value = value;
+            this.weight = -1;
+        }
+
+        public Node(T value, int weight) {
+            this.value = value;
+            this.weight = weight;
         }
     }
 

@@ -1,6 +1,5 @@
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Comparator;
 
 /**
  * Depth-first-search, a graph searching algorithms which traverses a given
@@ -130,8 +129,9 @@ public class DepthFirstSearch {
     }
 
     /** 
-     * Reverses the order of vertices in the adjacency list.
+     * Reverses the order of vertices in an iterable.
      * @param itr the {@code LinkedList} iterator to reverse its elements.
+     * @return iterable of the vertices in reversed order.
      */
     private static <T extends VertexInterface> 
             Iterable<T> reverse(Iterable<T> itr) {
@@ -143,6 +143,7 @@ public class DepthFirstSearch {
     /**
      * Detects if a graph is cyclic or acyclic.
      * <p>Graph safe operation.
+     * <p>Works on both directed and undirected graphs.
      * <p>The graph is cyclic if it contains a back edge. In other words,
      * while exploring the edge (u, v), if v is grey, then the edge is
      * a back edge and the graph contains a cycle.
@@ -246,7 +247,7 @@ public class DepthFirstSearch {
      */
     public static <T extends VertexInterface> 
             Iterable<T> topologicalSort(DirectedAcyclicGraph<T> DAG) {
-        return sortVerticesByFinishingTimeAsc(DAG);
+        return sortVerticesByFinishingTimeDesc(DAG);
     }
 
     /**
@@ -259,7 +260,7 @@ public class DepthFirstSearch {
      */
     public static <T extends VertexInterface> 
             Iterable<T> reverseTopologicalSort(DirectedAcyclicGraph<T> DAG) {
-        return sortVerticesByFinishingTimeDesc(DAG);
+        return sortVerticesByFinishingTimeAsc(DAG);
     }
 
     /**
@@ -326,7 +327,7 @@ public class DepthFirstSearch {
      * @return the list of the strongly-connected-components.
      */
     public static <T extends VertexInterface, E extends DirectedGraph<T>>
-            List<List<T>> stronglyConnectedComponents(E DG) {
+            List<List<T>> findStronglyConnectedComponents(E DG) {
         // make a copy of original graph to avoid modifying it
         DirectedGraph<DFSVertex> G = cloneGraph(DG);
         process(G);
@@ -375,7 +376,7 @@ public class DepthFirstSearch {
     }
 
     /**
-     * Unit test.
+     * Unit tests.
      */
     public static void main(String[] args) {
         // 0->1  2
@@ -392,7 +393,7 @@ public class DepthFirstSearch {
         DG.addEdge(4, 3);
         DG.addEdge(5, 5);
 
-        // Testing dfs process (recursive).
+        // Testing dfs (recursive).
         DirectedGraph<DFSVertex> G = DG.copy();
         System.out.println(G.toString());
         System.out.println("Before dfs:");
@@ -401,7 +402,7 @@ public class DepthFirstSearch {
         System.out.println("After dfs:");
         for (DFSVertex v : G.getVertices()) System.out.println(v);
 
-        // Testing dfs processNonRecursive (non-recursive).
+        // Testing dfs (non-recursive).
         G = DG.copy();
         System.out.println("Before dfs:");
         for (DFSVertex v : G.getVertices()) System.out.println(v);
@@ -455,10 +456,9 @@ public class DepthFirstSearch {
         //
         // Dag from figure 22.7 p.613 in CLRS book.
         //
-        // Produces (reversed):
+        // Produces:
         // 5-->6-->4-->2-->3-->8-->7-->1-->0
         // which corresponds to:
-        //
         //      ___________________________
         //     | __________________        |
         //     ||                  V       v
@@ -479,12 +479,13 @@ public class DepthFirstSearch {
         DAG.addEdge(6, 7);
         DAG.addEdge(8, 7);
         DirectedAcyclicGraph<DFSVertex> GC = DAG.copy();
-        process(GC);
-        // Running dfs on GC does not affect topologicalSort operation
-        // because topologicalSort copy the graph edges only and reset
-        // the vertices to default settings in the new graph.
         System.out.print("Topological-sort sorts vertices by ");
         System.out.println("finishing-time in descending order:");
+        // Running dfs on a graph does not affect topologicalSort operation
+        // because the latter operates on a clean copy of the original graph.
+        // Running df on GC is not required for topological sorting, but it is
+        // used here to display the finishing times of the vertices.
+        process(GC);
         for (DFSVertex v : topologicalSort(GC)) {
             System.out.println(v);
         }
@@ -504,7 +505,7 @@ public class DepthFirstSearch {
             if (i < 9) System.out.print("-->");
         }
         System.out.println();
-        // Testing stronglyConnectedComponents
+        // Testing findStronglyConnectedComponents
         // Diagram found in p.616 in CLRS book "Figure 22.9"
         //
         // 0-->1-->2<->3       components:
@@ -528,7 +529,7 @@ public class DepthFirstSearch {
         DG2.addEdge(6, 7);
         DG2.addEdge(7, 7);
         System.out.println("Strongly connected components: ");
-        List<List<Vertex>> components = stronglyConnectedComponents(DG2);
+        List<List<Vertex>> components = findStronglyConnectedComponents(DG2);
         System.out.println(DG2);
         for (List<Vertex> com : components) {
             System.out.print("Component: ");
