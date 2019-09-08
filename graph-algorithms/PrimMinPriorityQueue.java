@@ -8,10 +8,10 @@ import java.util.Iterator;
 public class PrimMinPriorityQueue 
         <T extends VertexInterface, E extends Comparable<E>> {
     public static final int NIL = -1;
-    public final E INFINITY = null;
+    public final E INFINITY = null; // PrimVertex key is +/-infinity when null
     public int n; // the number of elements in the heap
-    public PrimVertex<T, E>[] heap;
-    public int[] heapIndex;
+    public PrimVertex<T, E>[] heap; // minimum heap
+    public int[] heapIndex; // indexes of the original vertices in the heap
 
     /**
      * Constructor with a list of elements.
@@ -118,18 +118,13 @@ public class PrimMinPriorityQueue
     private void minHeapify(int i) {
         int l = left(i);
         int r = right(i);
-        int smallest = findSmallest(i, l, r);
+        int smallest = i;
+        if (l <= n && heap[l].compareTo(heap[i]) == -1) smallest = l;
+        if (r <= n && heap[r].compareTo(heap[smallest]) == -1) smallest = r;
         if (smallest != i) {
             switchPrimVertexs(i, smallest);
             minHeapify(smallest);
         }
-    }
-
-    private int findSmallest(int i, int l, int r) {
-        int smallest = i;
-        if (l <= n && heap[l].compareTo(heap[i]) == -1) smallest = l;
-        if (r <= n && heap[r].compareTo(heap[smallest]) == -1) smallest = r;
-        return smallest;
     }
 
     /**

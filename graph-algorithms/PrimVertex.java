@@ -3,10 +3,10 @@ public class PrimVertex <T extends VertexInterface, E extends Comparable<E>>
     public static final INF POSITIVE_INFINITY = INF.POSITIVE;
     public static final INF NEGATIVE_INFINITY = INF.NEGATIVE;
     public static final int NIL = -1;
-    public INF infinity = INF.NONE;
-    public final T vertex;
-    public int parent;
-    public E key;
+    public INF infinity = INF.NONE; // if weight is +inf, -inf or in between
+    public final T vertex; // original vertex
+    public int parent; // parent vertex
+    public E key; // weight
 
     private static enum INF {
         POSITIVE,
@@ -38,10 +38,8 @@ public class PrimVertex <T extends VertexInterface, E extends Comparable<E>>
         INF k2 = that.infinity;
         if (k1 == POSITIVE_INFINITY && k2 == POSITIVE_INFINITY) return 0;
         if (k1 == NEGATIVE_INFINITY && k2 == NEGATIVE_INFINITY) return 0;
-        if (k1 == POSITIVE_INFINITY) return 1;
-        if (k1 == NEGATIVE_INFINITY) return -1;
-        if (k2 == POSITIVE_INFINITY) return -1;
-        if (k2 == NEGATIVE_INFINITY) return 1;
+        if (k1 == POSITIVE_INFINITY || k2 == NEGATIVE_INFINITY) return 1;
+        if (k1 == NEGATIVE_INFINITY || k2 == POSITIVE_INFINITY) return -1;
         return this.key.compareTo(that.key);
     }
 
