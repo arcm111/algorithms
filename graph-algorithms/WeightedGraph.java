@@ -9,7 +9,7 @@ import java.util.Comparator;
  * Self-loops are forbidden in undirected graphs. {@code addEdge} prevents
  * adding such cycles.
  */
-public class WeightedGraph<T extends VertexInterface, E extends Number> 
+public class WeightedGraph<T extends VertexInterface, E extends Comparable<E>> 
         implements GraphInterface<T> {
     protected final Class<T> C;
     protected int V;
@@ -91,6 +91,10 @@ public class WeightedGraph<T extends VertexInterface, E extends Number>
      */
     public Iterable<T> adj(T x) {
         int v = x.getVertex();
+        return adj(v);
+    }
+
+    public Iterable<T> adj(int v) {
         validateVertex(v);
         LinkedList<T> iter = new LinkedList<>();
         for (WeightedEdge<T, E> e : adj[v]) iter.add(e.getDstVertex());
@@ -122,14 +126,7 @@ public class WeightedGraph<T extends VertexInterface, E extends Number>
      */
     public Iterable<WeightedEdge<T, E>> sortedEdges() {
         List<WeightedEdge<T, E>> edges = getEdges();
-        Collections.sort(edges, new Comparator<WeightedEdge<T, E>>(){
-            @Override
-            public int compare(WeightedEdge<T, E> a, WeightedEdge<T, E> b){
-                E w1 = a.getWeight();
-                E w2 = b.getWeight();
-                return (int) (w1.floatValue() - w2.floatValue());
-            }
-        });
+        Collections.sort(edges);
         return edges;
     }
 
