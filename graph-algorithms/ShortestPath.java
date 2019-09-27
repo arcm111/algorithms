@@ -160,5 +160,7 @@ public class ShortestPath {
         } else {
             System.out.println("Failed: the graph contains negative cycles");
         }
+
+        System.out.println("Testing DAG-Shortest-Path: ");
     }
 }
