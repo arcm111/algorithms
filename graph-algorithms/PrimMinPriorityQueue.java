@@ -6,11 +6,11 @@ import java.util.Iterator;
  * Modified min-heap priority queue, adjusted to work with prim's mst algorithm.
  */
 public class PrimMinPriorityQueue 
-        <T extends VertexInterface, E extends Comparable<E>> {
+        <T extends VertexInterface, E extends Number> {
     public static final int NIL = -1;
-    public final E INFINITY = null; // PrimVertex key is +/-infinity when null
+    public final E INFINITY = null; // key is +/-infinity when null
     public int n; // the number of elements in the heap
-    public PrimVertex<T, E>[] heap; // minimum heap
+    public WeightedVertex<T, E>[] heap; // minimum heap
     public int[] heapIndex; // indexes of the original vertices in the heap
 
     /**
@@ -21,13 +21,13 @@ public class PrimMinPriorityQueue
      * @param size the number of elements in the iterable.
      */
     @SuppressWarnings("unchecked")
-    public PrimMinPriorityQueue(Iterable<PrimVertex<T, E>> items, int size) {
-        this.heap = (PrimVertex<T, E>[]) new PrimVertex[size + 1];
-        this.heapIndex = new int[size];
-        buildHeap(items, size);
+    public PrimMinPriorityQueue(Iterable<WeightedVertex<T, E>> items, int n) {
+        this.heap = (WeightedVertex<T, E>[]) new WeightedVertex[n + 1];
+        this.heapIndex = new int[n];
+        buildHeap(items, n);
     }
     
-    public PrimMinPriorityQueue(PrimVertex<T, E>[] items, int size) {
+    public PrimMinPriorityQueue(WeightedVertex<T, E>[] items, int size) {
         this(Arrays.asList(items), size);
     }
 
@@ -36,9 +36,9 @@ public class PrimMinPriorityQueue
      * @param arr an iterable of the elements to add to the heap.
      * @param n the number of the elements in the iterable.
      */
-    private void buildHeap(Iterable<PrimVertex<T, E>> arr, int n) {
+    private void buildHeap(Iterable<WeightedVertex<T, E>> arr, int n) {
         this.n = n;
-        Iterator<PrimVertex<T, E>> iter = arr.iterator();
+        Iterator<WeightedVertex<T, E>> iter = arr.iterator();
         for (int i = 1; i <= n; i++) {
             heap[i] = iter.next();
             heapIndex[i - 1] = i;
@@ -48,7 +48,7 @@ public class PrimMinPriorityQueue
         }
     }
 
-    public boolean inQueue(PrimVertex<T, E> v) {
+    public boolean inQueue(WeightedVertex<T, E> v) {
         return heapIndex[v.getVertex()] != NIL;
     }
 
@@ -100,12 +100,12 @@ public class PrimMinPriorityQueue
      * @param i the index of the first node.
      * @param j the index of the second node.
      */
-    private void switchPrimVertexs(int i, int j) {
+    private void switchWeightedVertexs(int i, int j) {
         // switch nodes indexes
         heapIndex[heap[i].getVertex()] = j;
         heapIndex[heap[j].getVertex()] = i;
         // switch nodes
-        PrimVertex<T, E> temp = heap[i];
+        WeightedVertex<T, E> temp = heap[i];
         heap[i] = heap[j];
         heap[j] = temp;
     }
@@ -122,7 +122,7 @@ public class PrimMinPriorityQueue
         if (l <= n && heap[l].compareTo(heap[i]) == -1) smallest = l;
         if (r <= n && heap[r].compareTo(heap[smallest]) == -1) smallest = r;
         if (smallest != i) {
-            switchPrimVertexs(i, smallest);
+            switchWeightedVertexs(i, smallest);
             minHeapify(smallest);
         }
     }
@@ -133,7 +133,7 @@ public class PrimMinPriorityQueue
      * @return the minimum element in the heap.
      * @throws NoSuchElementException if the heap is emepty.
      */
-    public PrimVertex<T, E> extractMin() {
+    public WeightedVertex<T, E> extractMin() {
         if (n < 1) {
             throw new NoSuchElementException("heap is empty");
         }
@@ -142,7 +142,7 @@ public class PrimMinPriorityQueue
         heapIndex[heap[1].getVertex()] = NIL;
         // replace first element in the heap with the last element,
         // restore min-heap-property, and return the first element.
-        PrimVertex<T, E> min = heap[1];
+        WeightedVertex<T, E> min = heap[1];
         heap[1] = heap[n];
         n--;
         if (n > 0) minHeapify(1);
@@ -155,23 +155,51 @@ public class PrimMinPriorityQueue
      * @param key the new priority of the element.
      * @throws IllegalArgumentException if the new key is smaller than old key.
      */
-    public void decreaseKey(PrimVertex<T, E> v, E key) {
+    public void decreaseKey(WeightedVertex<T, E> v, E key) {
         // find heap's index of vertex v
         int i = heapIndex[v.getVertex()];
         if (i == NIL) {
             throw new IllegalArgumentException("element is not in the queue");
         } else if (i > n) {
             throw new IllegalArgumentException("Invalid index: " + i);
-        } else if (heap[i].key != INFINITY && key.compareTo(heap[i].key) == 1) {
+        } else if (heap[i].key != INFINITY && greater(key, heap[i].key)) {
             System.out.println("Old key: " + v.key);
             System.out.println("New key: " + key);
             throw new IllegalArgumentException("new key should be smaller");
         }
         heap[i].setKey(key);
         while (i > 1 && heap[parent(i)].compareTo(heap[i]) == 1) {
-            switchPrimVertexs(i, parent(i));
+            switchWeightedVertexs(i, parent(i));
             i = parent(i);
         }
+    }
+
+    private boolean greater(E a, E b) {
+        return compare(a, b) == 1;
+    }
+
+    private int compare(E w1, E w2) {
+        if (w1 instanceof Float) {
+            Float a = Float.valueOf(w1.floatValue());
+            Float b = Float.valueOf(w2.floatValue());
+            return a.compareTo(b);
+        } else if (w1 instanceof Double) {
+            Double a = Double.valueOf(w1.doubleValue());
+            Double b = Double.valueOf(w2.doubleValue());
+            return a.compareTo(b);
+        } else if (w1 instanceof Long) {
+            Long a = Long.valueOf(w1.longValue());
+            Long b = Long.valueOf(w2.longValue());
+            return a.compareTo(b);
+        } else if (w1 instanceof Short) {
+            Short a = Short.valueOf(w1.shortValue());
+            Short b = Short.valueOf(w2.shortValue());
+            return a.compareTo(b);
+        }
+        // base case; if none of the cases above applied
+        Integer a = Integer.valueOf(w1.intValue());
+        Integer b = Integer.valueOf(w2.intValue());
+        return a.compareTo(b);
     }
 
     /**
@@ -192,12 +220,12 @@ public class PrimMinPriorityQueue
         s.append("[vertex]: heap index -> key\n");
         s.append("============================\n");
         for (int i = 0; i < n; i++) {
-            PrimVertex<T, E> v = heap[heapIndex[i]];
+            WeightedVertex<T, E> v = heap[heapIndex[i]];
             E key = v.key;
             String k;
-            if (v.infinity == PrimVertex.POSITIVE_INFINITY) {
+            if (v.infinity == WeightedVertex.POSITIVE_INFINITY) {
                 k = "positive infinity";
-            } else if (v.infinity == PrimVertex.NEGATIVE_INFINITY) {
+            } else if (v.infinity == WeightedVertex.NEGATIVE_INFINITY) {
                 k = "negative infinity";
             } else {
                 k = key.toString();
@@ -213,10 +241,11 @@ public class PrimMinPriorityQueue
     public static void main(String[] args) {
         System.out.println("Min-Heap Priority Queue: ");
         Integer[] keys = {7, 2, 8, 9, 10, 1, 3, 6, 4, 5};
-        LinkedList<PrimVertex<Vertex, Integer>> items = new LinkedList<>();
+        LinkedList<WeightedVertex<Vertex, Integer>> items = new LinkedList<>();
         for (int i = 0; i < 10; i++) {
-            PrimVertex<Vertex, Integer> v = new PrimVertex<>(new Vertex(i));
-            v.parent = PrimVertex.NIL;
+            WeightedVertex<Vertex, Integer> v = 
+                    new WeightedVertex<>(new Vertex(i));
+            v.parent = WeightedVertex.NIL;
             v.setKey(keys[i]);
             items.add(v);
         }

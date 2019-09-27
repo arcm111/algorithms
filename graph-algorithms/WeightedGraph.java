@@ -9,13 +9,13 @@ import java.util.Comparator;
  * Self-loops are forbidden in undirected graphs. {@code addEdge} prevents
  * adding such cycles.
  */
-public class WeightedGraph<T extends VertexInterface, E extends Comparable<E>> 
+public class WeightedGraph<T extends VertexInterface, E extends Number> 
         implements GraphInterface<T> {
     protected final Class<T> C;
     protected int V;
     protected int E = 0;
     protected T[] vertices;
-    protected LinkedList<WeightedEdge<T, E>>[] adj;
+    protected LinkedList<WeightedVertex<T, E>>[] adj;
 
     /**
      * Constructor for initializing the vertices array.
@@ -31,16 +31,34 @@ public class WeightedGraph<T extends VertexInterface, E extends Comparable<E>>
         this.adj = newAdjacencyList(V);
     }
 
+    public WeightedGraph(T[] vertices) {
+        this.C = null;
+        for (int i = 0; i < vertices.length; i++) {
+            if (vertices[i] == null) {
+                throw new IllegalArgumentException("Invalid vertices array");
+            }
+        }
+        this.V = vertices.length;
+        this.vertices = vertices;
+        this.adj = newAdjacencyList(V);
+    }
+
     /**
      * creates a copy of this graph containing only vertices but no edges.
      */
     public WeightedGraph<T, E> newInstance() {
+        if (C == null) {
+            throw new UnsupportedOperationException("C was not initialized");
+        }
         return new WeightedGraph<T, E>(C, V);
     }
 
 
     @SuppressWarnings("unchecked")
     private T[] newVerticesArray(int V) {
+        if (C == null) {
+            throw new UnsupportedOperationException("C was not initialized");
+        }
         T[] arr = (T[]) new VertexInterface[V];
         for (int i = 0; i < V; i++) {
             try {
@@ -53,11 +71,11 @@ public class WeightedGraph<T extends VertexInterface, E extends Comparable<E>>
     }
 
     @SuppressWarnings("unchecked")
-    private LinkedList<WeightedEdge<T, E>>[] newAdjacencyList(int V) {
-        LinkedList<WeightedEdge<T, E>>[] adjList = 
-                (LinkedList<WeightedEdge<T, E>>[]) new LinkedList[V];
+    protected LinkedList<WeightedVertex<T, E>>[] newAdjacencyList(int V) {
+        LinkedList<WeightedVertex<T, E>>[] adjList = 
+                (LinkedList<WeightedVertex<T, E>>[]) new LinkedList[V];
         for (int i = 0; i < V; i++) {
-            adjList[i] = new LinkedList<WeightedEdge<T, E>>();
+            adjList[i] = new LinkedList<WeightedVertex<T, E>>();
         }
         return adjList;
     }
@@ -97,25 +115,33 @@ public class WeightedGraph<T extends VertexInterface, E extends Comparable<E>>
     public Iterable<T> adj(int v) {
         validateVertex(v);
         LinkedList<T> iter = new LinkedList<>();
-        for (WeightedEdge<T, E> e : adj[v]) iter.add(e.getDstVertex());
+        for (WeightedVertex<T, E> w : adj[v]) iter.add(w.vertex);
         return iter;
     }
 
     /**
      * Returns an iterable of the outdegree edges of a vertex v.
+     * Returns the edges as weighted vertices containing the vertex incident
+     * to each edge.
      * @param v the vertex to get the adjacency list for.
      * @throws IllegalArgumentException if v is invalid.
      */
-    public Iterable<WeightedEdge<T, E>> adjEdges(T x) {
-        int v = x.getVertex();
+    public Iterable<WeightedVertex<T, E>> adjEdges(T u) {
+        int v = u.getVertex();
         validateVertex(v);
         return adj[v];
+    } 
+
+    public Iterable<WeightedVertex<T, E>> adjEdges(WeightedVertex<T, E> u) {
+        return adjEdges(u.vertex);
     }
 
     public List<WeightedEdge<T, E>> getEdges() {
         List<WeightedEdge<T, E>> edges = new ArrayList<>();
-        for (int i = 0; i < V; i++) {
-            for (WeightedEdge<T, E> e : adj[i]) edges.add(e);
+        for (int u = 0; u < V; u++) {
+            for (WeightedVertex<T, E> v : adj[u]) {
+                edges.add(new WeightedEdge<>(vertices[u], v.vertex, v.key));
+            }
         }
         return edges;
     }
@@ -148,12 +174,12 @@ public class WeightedGraph<T extends VertexInterface, E extends Comparable<E>>
             String ex = "self-loops are not allowed " + x + ":" + y;
             throw new IllegalArgumentException(ex);
         }
-        adj[x].add(new WeightedEdge<T, E>(vertices[x], vertices[y], w));
-        adj[y].add(new WeightedEdge<T, E>(vertices[y], vertices[x], w));
+        adj[x].add(new WeightedVertex<T, E>(vertices[y], x, w));
+        adj[y].add(new WeightedVertex<T, E>(vertices[x], y, w));
         this.E++;
     }
 
-    protected void copyEdges(LinkedList<WeightedEdge<T, E>>[] adj, int V) {
+    protected void copyEdges(LinkedList<WeightedVertex<T, E>>[] edges, int V) {
         if (V != this.V) {
             throw new IllegalArgumentException("V invalid");
         }
@@ -161,11 +187,8 @@ public class WeightedGraph<T extends VertexInterface, E extends Comparable<E>>
         this.adj = newAdjacencyList(V);
         int E = 0;
         for (int u = 0; u < V; u++) {
-            for (WeightedEdge<T, E> e : adj[u]) {
-                T source = vertices[e.incidentFrom()];
-                T dst = vertices[e.incidentTo()];
-                E weight = e.getWeight();
-                this.adj[u].add(new WeightedEdge<T, E>(source, dst, weight));
+            for (WeightedVertex<T, E> v : edges[u]) {
+                this.adj[u].add(new WeightedVertex<T, E>(v.vertex, v.key));
                 E++;
             }
         }
@@ -178,6 +201,9 @@ public class WeightedGraph<T extends VertexInterface, E extends Comparable<E>>
      * @return a copy of the graph as {@code Object}.
      */
     public WeightedGraph<T, E> copy() {
+        if (C == null) {
+            throw new UnsupportedOperationException("C was not initialized");
+        }
         WeightedGraph<T, E> G = new WeightedGraph<>(C, V);
         G.copyEdges(adj, V);
         return G;
@@ -216,13 +242,14 @@ public class WeightedGraph<T extends VertexInterface, E extends Comparable<E>>
     /**
      * Generates a string representation of the graph.
      */
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("V: " + V + ", E: " + E + "\n");
         for (int v = 0; v < V; v++) {
             builder.append("[" + v + "]: ");
-            for (WeightedEdge<T, E> x : adj[v]) {
-                builder.append(x.getDstVertex() + ":" + x.getWeight() + " ");
+            for (WeightedVertex<T, E> x : adj[v]) {
+                builder.append(x.vertex + ":" + x.key + " ");
             }
             if (v < V - 1) builder.append("\n");
         }

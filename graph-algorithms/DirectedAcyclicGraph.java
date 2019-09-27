@@ -32,8 +32,7 @@ public class DirectedAcyclicGraph<T extends VertexInterface>
         }
         if (DepthFirstSearch.areConnected(this, y, x)) {
             String err = "adding edge (%d, %d) will create a cycle";
-            String ex = String.format(err, x, y);
-            throw new IllegalArgumentException(ex);
+            throw new IllegalArgumentException(String.format(err, x, y));
         }
         adj[x].add(vertices[y]);
         this.E++;

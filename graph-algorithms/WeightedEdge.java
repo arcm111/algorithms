@@ -1,7 +1,7 @@
 /**
  * A weighted directed graph-edge class.
  */
-public class WeightedEdge<T extends VertexInterface, E extends Comparable<E>> 
+public class WeightedEdge<T extends VertexInterface, E extends Number> 
         implements Comparable<WeightedEdge<T, E>> {
     private final int u; // incident from
     private final int v; // incident to
@@ -43,7 +43,7 @@ public class WeightedEdge<T extends VertexInterface, E extends Comparable<E>>
 
     @Override
     public int compareTo(WeightedEdge<T, E> that) {
-        return this.getWeight().compareTo(that.getWeight());
+        return NumberUtility.compare(this.getWeight(), that.getWeight());
     }
 
     @Override

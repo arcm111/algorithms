@@ -26,6 +26,26 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
         this.adj = newAdjacencyList(V);
     }
 
+    /**
+     * Constructor with vertices array supplied as an argument.
+     * No need to initialize the vertices array.
+     * The vertex class is not known, all methods dependant on it will
+     * throw an exception if used.
+     * @param vertices the vertices array to be added to graph
+     * @throws IllegalArgumentException if any of the vertices is null
+     */
+    public Graph(T[] vertices) {
+        this.C = null;
+        for (int i = 0; i < vertices.length; i++) {
+            if (vertices[i] == null) {
+                throw new IllegalArgumentException("null vertex found");
+            }
+        }
+        this.V = vertices.length;
+        this.vertices = vertices;
+        this.adj = newAdjacencyList(V);
+    }
+
     @SuppressWarnings("unchecked")
     private T[] newVerticesArray(int V) {
         T[] arr = (T[]) new VertexInterface[V];
@@ -121,8 +141,12 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
      * Clones the graph.
      * Returns an immutable copy of the current graph in <em>O(V + E)</em>.
      * @return a copy of the graph as {@code Object}.
+     * @throws UnsupportedOperationException if C is null
      */
     public Graph<T> copy() {
+        if (C == null) {
+            throw new UnsupportedOperationException("C is null");
+        }
         Graph<T> graph = new Graph<>(C, V);
         graph.copyEdges(adj, V);
         return graph;

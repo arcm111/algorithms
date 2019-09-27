@@ -18,7 +18,7 @@ public class MinimumSpanningTree {
      * Running time <em>O(ElgV)</em>.
      * @return {@code WeightedGraph<T, E>} the minimum-spanning-tree.
      */
-    public static <T extends VertexInterface, E extends Comparable<E>> 
+    public static <T extends VertexInterface, E extends Number> 
             WeightedGraph<T, E> kruskal(WeightedGraph<T, E> G) {
         // create a copy of the graph without the edges.
         WeightedGraph<T, E> MST = G.newInstance();
@@ -45,55 +45,61 @@ public class MinimumSpanningTree {
      * operation {@code inQueue} in constant time. The priority queue allows
      * it to find a safe light edge to add to MST in each step.
      * Running time <em>O(ElgV)</em>
-     */
-    public static <T extends VertexInterface, E extends Comparable<E>> 
-            WeightedGraph<T, E> prim(WeightedGraph<T, E> G) {
-        return prim(G, 0);
-    }
-
-    /**
-     * Perform prim algorithm using a specific starting vertex.
-     * Same as the method above except for the starting vertex which can
-     * be chosen to be other than 0.
+     * @param G the weighted undirected graph.
+     * @return the minimum-spanning-tree of the graph.
      */
     @SuppressWarnings("unchecked")
-    public static <T extends VertexInterface, E extends Comparable<E>> 
-            WeightedGraph<T, E> prim(WeightedGraph<T, E> G, int r) {
-        WeightedGraph<T, E> MST = G.newInstance();
+    public static <T extends VertexInterface, E extends Number> 
+            WeightedGraph<T, E> prim(WeightedGraph<T, E> G) {
         int n = G.V();
-        // store all graph vertices in an array of primvertex elements
-        PrimVertex<T, E>[] vertices = (PrimVertex<T, E>[]) new PrimVertex[n];
+        // store all graph vertices in an array with maximum weights +inf
+        WeightedVertex<T, E>[] vertices = 
+                (WeightedVertex<T, E>[]) new WeightedVertex[n];
         for (int i = 0; i < n; i++) {
-            PrimVertex<T, E> v = new PrimVertex<>(G.getVertex(i));
-            v.setKey(PrimVertex.POSITIVE_INFINITY);
-            v.parent = PrimVertex.NIL;
+            WeightedVertex<T, E> v = new WeightedVertex<>(G.getVertex(i));
+            v.setKey(WeightedVertex.POSITIVE_INFINITY);
+            v.parent = WeightedVertex.NIL;
             vertices[i] = v;
         }
-        vertices[r].setKey(PrimVertex.NEGATIVE_INFINITY);
-        PrimMinPriorityQueue<T, E> Q = new PrimMinPriorityQueue<>(vertices, n);
-        while (!Q.isEmpty()) {
-            PrimVertex<T, E> u = Q.extractMin();
-            // Get edges indident from u and compare their weights to u.key
-            for (WeightedEdge<T, E> e : G.adjEdges(u.vertex)) {
-                PrimVertex<T, E> v = vertices[e.incidentTo()];
-                if (Q.inQueue(v) && less(e.getWeight(), v)) {
-                    v.parent = u.getVertex();
-                    Q.decreaseKey(v, e.getWeight());
-                }
+        for (int i = 0; i < n; i++) {
+            if (vertices[i].parent == WeightedVertex.NIL) {
+                prim(G, vertices, n, i);
             }
         }
+        // add all final results of the algorithm to a new graph
+        // representing the minimum spanning tree of the original graph
+        WeightedGraph<T, E> MST = G.newInstance();
         for (int i = 0; i < n; i++) {
-            PrimVertex<T, E> x = vertices[i];
-            if (x.parent != PrimVertex.NIL) MST.addEdge(x.parent, i, x.key);
+            WeightedVertex<T, E> x = vertices[i];
+            if (x.parent != WeightedVertex.NIL) MST.addEdge(x.parent, i, x.key);
         }
         return MST;
     }
 
-    private static <T extends VertexInterface, E extends Comparable<E>> 
-            boolean less(E w, PrimVertex<T, E> v) {
-        if (v.infinity == PrimVertex.POSITIVE_INFINITY) return true;
-        if (v.infinity == PrimVertex.NEGATIVE_INFINITY) return false;
-        return w.compareTo(v.key) == -1;
+    /**
+     * Perform prim's algorithm using a specific starting vertex.
+     */
+    public static <T extends VertexInterface, E extends Number> 
+            void prim(WeightedGraph<T, E> G, 
+                    WeightedVertex<T, E>[] vertices, int n, int r) {
+        // set the weight of the source vertex to min value -inf
+        vertices[r].setKey(WeightedVertex.NEGATIVE_INFINITY);
+        // add all vertices to the priority queue and run prim algorithm
+        // decreasing the weights of the stored vertices whenever we find
+        // a smaller weight edge incident to them.
+        PrimMinPriorityQueue<T, E> Q = new PrimMinPriorityQueue<>(vertices, n);
+        while (!Q.isEmpty()) {
+            WeightedVertex<T, E> u = Q.extractMin();
+            // find the other vertices of u's adjacent edges
+            for (WeightedVertex<T, E> w : G.adjEdges(u)) {
+                // compare the graph edge's weight to the stored vertex's weight
+                WeightedVertex<T, E> v = vertices[w.getVertex()];
+                if (Q.inQueue(v) && w.compareTo(v) == -1) {
+                    v.parent = u.getVertex();
+                    Q.decreaseKey(v, w.key);
+                }
+            }
+        }
     }
 
     /**

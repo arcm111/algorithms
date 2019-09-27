@@ -246,7 +246,7 @@ public class MinPriorityQueue<T extends Comparable<T>> {
         }
         // Can be done this way:
         // heap[i] = key;
-        // while (i >= 0 && heap[parent(i)].compareTo(heap[i]) == 1) {
+        // while (i > 0 && heap[parent(i)].compareTo(heap[i]) == 1) {
         // 	switchNodes(i, parent(i));
         // 	i = parent(i);
         // }

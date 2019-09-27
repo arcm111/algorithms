@@ -11,6 +11,10 @@ public class DirectedGraph <T extends VertexInterface> extends Graph<T> {
         super(C, V);
     }
 
+    public DirectedGraph(T[] vertices) {
+        super(vertices);
+    }
+
     /**
      * Adds edges to the adjacency list using indexes of the stored vertices.
      * @param x the index of the first vertex.

@@ -147,7 +147,9 @@ public class DepthFirstSearch {
      * <p>The graph is cyclic if it contains a back edge. In other words,
      * while exploring the edge (u, v), if v is grey, then the edge is
      * a back edge and the graph contains a cycle.
+     * <p>Running time <em>O(V + E)</em>
      * @param G the graph to be tested.
+     * @return true if acyclic, false otherwise.
      */
     public static <T extends DFSVertex, E extends GraphInterface<T>>
             boolean isCyclic(E graph) {
@@ -245,8 +247,11 @@ public class DepthFirstSearch {
      * @param DAG the dag graph to sort.
      * @return the sorted vertices as iterable.
      */
-    public static <T extends VertexInterface> 
-            Iterable<T> topologicalSort(DirectedAcyclicGraph<T> DAG) {
+    public static <T extends VertexInterface, E extends DirectedGraph<T>> 
+            Iterable<T> topologicalSort(E DAG) {
+        if (isCyclic(cloneGraph(DAG))) {
+            throw new IllegalArgumentException("Cyclic graph error");
+        }
         return sortVerticesByFinishingTimeDesc(DAG);
     }
 
@@ -331,14 +336,11 @@ public class DepthFirstSearch {
         // make a copy of original graph to avoid modifying it
         DirectedGraph<DFSVertex> G = cloneGraph(DG);
         process(G);
-
         // sort the vertices by finishing time in descending order
         Iterable<T> sorted = sortVerticesByFinishingTimeDesc(DG);
-
         // make another copy and transpose it
         DirectedGraph<DFSVertex> GT = cloneGraph(DG);
         GT.transpose();
-
         // run dfs on the vertices of the transposed graph GT in the order 
         // of the sorted vertices of the non-transposed graph G.
         List<List<T>> components = new ArrayList<>();
