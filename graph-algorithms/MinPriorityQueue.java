@@ -19,7 +19,7 @@ import java.util.Iterator;
  * maintain min-heap-property, while {@code decreaseKey} moves an element up
  * the heap "swims".
  */
-public class MinPriorityQueue<T extends Comparable<T>> {
+public class MinPriorityQueue<T extends Comparable<? super T>> {
     private final static int DEFAULT_CAPACITY = 16; // default initial capacity
     public int initialCapacity; // current initial capacity
     public int capacity; // current capacity of the heap

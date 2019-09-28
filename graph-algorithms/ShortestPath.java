@@ -205,9 +205,59 @@ public class ShortestPath {
         DAG.addEdge(3, 4, -1);
         DAG.addEdge(3, 5, 1);
         DAG.addEdge(4, 5, -2);
-        DAGShortestPath(DAG, 0);
+        System.out.println(DAG);
+        DAGShortestPath(DAG, 1);
+        for (ShortestPathVertex<Integer> v : DAG.getVertices()) {
+            System.out.println(v);
+        }
+
+        // Testing Dijkstra
+        //
+        //           1
+        //       0------->1
+        //      ^^       ^^
+        //   10/ |3    9/ |6
+        //    /  |     /  |
+        //   / 7 |    /   |
+        //  4\<--+---x    |  
+        //    \  |  / \   |
+        //    5\ |2/   \  |4
+        //      vv/     \ v
+        //      2-------->3
+        //           2
+        //
+        System.out.println("Testing Dijkstra:");
+        G = new WeightedDirectedGraph<ShortestPathVertex<Integer>, 
+                Integer>(vertices);
+        G.addEdge(0, 1, 1);
+        G.addEdge(0, 2, 2);
+        G.addEdge(1, 3, 4);
+        G.addEdge(2, 0, 3);
+        G.addEdge(2, 1, 9);
+        G.addEdge(2, 3, 2);
+        G.addEdge(3, 1, 6);
+        G.addEdge(3, 4, 7);
+        G.addEdge(4, 0, 10);
+        G.addEdge(4, 2, 5);
+        System.out.println(G);
+        Dijkstra(G, 4);
         for (ShortestPathVertex<Integer> v : G.getVertices()) {
             System.out.println(v);
         }
+        // Testing Dijkstra
+        //
+        //        (8)  1   (9)
+        //         0------->1
+        //         ^         
+        //         |          
+        //         |         
+        //         |3        
+        // (0)4\   |           
+        //      \  |         
+        //      5\ |         .
+        //        v|         
+        //        2-------->3
+        //       (5)   2   (7)
+        //
     }
 }
