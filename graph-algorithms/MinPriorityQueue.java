@@ -7,7 +7,8 @@ import java.util.Iterator;
  * <p>Uses dynamic array to store the elements that expands in size when the
  * heap is full and contract when the number of the elements in the heap
  * falls to less than quarter of its capacity. The insert and delete 
- * running time is <em>O(1)</em> amortized and <em>O(n)</em> worst-case. 
+ * running time of dynamic arrays is <em>O(1)</em> amortized and <em>O(n)</em>
+ * worst-case. 
  * <p>min-heap-property: for each element i in the heap, parent(i) is smaller.
  * <p>Running time of {@code minHeapify}, {@code insert}, {@code extractMin},
  * {@code decreaseKey} is <em>O(lgn)</em>.

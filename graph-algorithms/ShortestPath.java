@@ -1,27 +1,29 @@
 public class ShortestPath {
     /**
      * Bellman-Ford algorithm.
+     * <p>Single source shortest path algorithm.
+     * <p>Allows negative weight edges but no negative weight cycles.
+     * <p>Can detect negative weight cycles.
+     * <p>Relaxes each edge V - 1 times.
+     * <p>Running time is <em>O(EV)</em>.
      * @param G the weighted directed graph
      * @param s the source vertex
      * @return null if the graph contians negative weight cycles
      *		   Otherwise, it returns the predecessor subgraph
      */
     public static <E extends Number, T extends ShortestPathVertex<E>>
-            boolean bellmanFordExtended(WeightedDirectedGraph<T, E> G, int s) {
+            boolean bellmanFord(WeightedDirectedGraph<T, E> G, int s) {
         initializeSingleSource(G, s);
         for (int i = 0; i < G.V(); i++) {
             for (WeightedEdge<T, E> e : G.getEdges()) {
-                ShortestPathVertex<E> u = e.getSourceVertex();
-                ShortestPathVertex<E> v = e.getDstVertex();
-                if (u.infinity == ShortestPathVertex.POSITIVE_INFINITY) {
-                    continue;
-                }
+                T u = e.getSourceVertex();
+                T v = e.getDstVertex();
                 relax(u, v, e.getWeight());
             }
         }
         for (WeightedEdge<T, E> e : G.getEdges()) {
-            ShortestPathVertex<E> u = e.getSourceVertex();
-            ShortestPathVertex<E> v = e.getDstVertex();
+            T u = e.getSourceVertex();
+            T v = e.getDstVertex();
             if (!triangleInequality(u, v, e.getWeight())) {
                 // negative weight cycle detected
                 return false;
@@ -30,14 +32,37 @@ public class ShortestPath {
         return true;
     }
 
+    /**
+     * DAG-Shortest-Path Single source Shortest Path algorithm.
+     * <p>Works only on directed weighted acyclic graphs which is a requirement
+     * in itself for topological sorting used in the algorithm.
+     * <p>Negative edges are allowed but no positive or negative cycles.
+     * <p>Relaxes each edge only once.
+     * <p>Running time <em>O(V + E)</em>
+     * @param G the graph to perform the algorithm on
+     * @param s source vertex to use to find shortest paths to other vertices
+     */
     public static <E extends Number, T extends ShortestPathVertex<E>>
             void DAGShortestPath(WeightedDirectedAcyclicGraph<T, E> G, 
                     int s) {
         initializeSingleSource(G, s);
         for (T u : DepthFirstSearch.topologicalSort(G)) {
-            for (WeightedVertex<T, E> x : G.adjEdges(u)) {
-                T v = x.vertex;
-                relax(u, v, x.getKey());
+            for (WeightedVertex<T, E> w : G.adjEdges(u)) {
+                T v = w.vertex;
+                relax(u, v, w.getKey());
+            }
+        }
+    }
+
+    public static <E extends Number, T extends ShortestPathVertex<E>> 
+                void Dijkstra(WeightedDirectedGraph<T, E> G, int s) {
+        initializeSingleSource(G, s);
+        MinPriorityQueue<T> Q = new MinPriorityQueue<>(G.getVertices(), G.V());
+        while (!Q.isEmpty()) {
+            T u = Q.extractMin();
+            for (WeightedVertex<T, E> w : G.adjEdges(u)) {
+                T v = w.vertex;
+                relax(u, v, w.getKey());
             }
         }
     }
@@ -50,9 +75,9 @@ public class ShortestPath {
      *		   distance (key) set to infinity (graph independent vertices)
      */
     @SuppressWarnings("unchecked")
-    private static <E extends Number, T extends ShortestPathVertex<E>,
-            W extends GraphInterface<T>>
-            void initializeSingleSource(W G, int s) {
+    private static <E extends Number, 
+            W extends GraphInterface<? extends ShortestPathVertex<E>>>
+                    void initializeSingleSource(W G, int s) {
         for (int i = 0; i < G.V(); i++) {
             ShortestPathVertex<E> v = G.getVertex(i);
             v.parent = ShortestPathVertex.NIL;
@@ -70,6 +95,7 @@ public class ShortestPath {
      */
     private static <E extends Number, T extends VertexInterface>
             void relax(ShortestPathVertex<E> u, ShortestPathVertex<E> v, E w) {
+        if (u.infinity == ShortestPathVertex.POSITIVE_INFINITY) return;
         if (!triangleInequality(u, v, w)) {
             v.setDistance(u.sumDistances(w));
             v.parent = u.getVertex();
@@ -152,7 +178,7 @@ public class ShortestPath {
         //        2(7)      3(-2)
         //            
         //
-        if (ShortestPath.bellmanFordExtended(G, 4) == true) {
+        if (ShortestPath.bellmanFord(G, 4) == true) {
             System.out.println("No negative cycles detected.");
             for (ShortestPathVertex<Integer> v : G.getVertices()) {
                 System.out.println(v);
@@ -162,5 +188,26 @@ public class ShortestPath {
         }
 
         System.out.println("Testing DAG-Shortest-Path: ");
+        ShortestPathVertex<Integer>[] arr = 
+                (ShortestPathVertex<Integer>[]) new ShortestPathVertex[6];
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = new ShortestPathVertex<Integer>(i);
+        }
+        WeightedDirectedAcyclicGraph<ShortestPathVertex<Integer>, Integer> DAG =
+                new WeightedDirectedAcyclicGraph<>(arr);
+        DAG.addEdge(0, 1, 5);
+        DAG.addEdge(0, 2, 3);
+        DAG.addEdge(1, 2, 2);
+        DAG.addEdge(1, 3, 6);
+        DAG.addEdge(2, 3, 7);
+        DAG.addEdge(2, 4, 4);
+        DAG.addEdge(2, 5, 2);
+        DAG.addEdge(3, 4, -1);
+        DAG.addEdge(3, 5, 1);
+        DAG.addEdge(4, 5, -2);
+        DAGShortestPath(DAG, 0);
+        for (ShortestPathVertex<Integer> v : G.getVertices()) {
+            System.out.println(v);
+        }
     }
 }

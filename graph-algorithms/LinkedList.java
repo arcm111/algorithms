@@ -109,17 +109,20 @@ public class LinkedList<T> implements Iterable<T> {
             this.cur = firstNode;
         }
 
+        @Override
         public boolean hasNext() {
             return cur != null;
         }
 
+        @Override
         public T next() {
             T v = cur.value;
             this.cur = cur.next;
             return v;
         }
 
-        public void remove(T x) {
+        @Override
+        public void remove() {
             throw new UnsupportedOperationException("operation not supported");
         }
     }

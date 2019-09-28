@@ -87,6 +87,11 @@ public class Stack<T> implements Iterable<T> {
             this.firstNode = cur.next;
             return cur.item;
         }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
     }
 
     /**
