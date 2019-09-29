@@ -118,6 +118,70 @@ public class ShortestPathVertex<E extends Number> implements VertexInterface,
         return NumberUtility.compare(a, b);
     }
 
+    // Helper Key class
+    public static class Key<W extends Number> implements Comparable<Key<W>> {
+        public INF infinity = INF.NONE;
+        public W value = null;
+
+        public void setKey(INF infinity) {
+            this.infinity = infinity;
+            this.value = null;
+        }
+
+        public void setKey(W value) {
+            this.infinity = INF.NONE;
+            this.value = value;
+        }
+
+        public Key<W> addKey(Key<W> that) {
+            INF k1 = this.infinity;
+            INF k2 = that.infinity;
+            Key<W> sum = new Key<>();
+            if (k1 == k2 && k1 != INF.NONE && k2 != INF.NONE) {
+                sum.infinity = k1;
+            } else if (k1 == POSITIVE_INFINITY && k2 == NEGATIVE_INFINITY) {
+                throw new IllegalArgumentException("Indeterminate");
+            } else if (k1 == NEGATIVE_INFINITY && k2 == POSITIVE_INFINITY) {
+                throw new IllegalArgumentException("Indeterminate");
+            } else if (k1 == POSITIVE_INFINITY || k2 == POSITIVE_INFINITY) {
+                sum.infinity = POSITIVE_INFINITY;
+            } else if (k1 == NEGATIVE_INFINITY || k2 == NEGATIVE_INFINITY) {
+                sum.infinity = NEGATIVE_INFINITY;
+            } else if (k2 == ZERO) {
+                sum.infinity = INF.NONE;
+                sum.value = this.value;
+            } else if (k1 == ZERO) {
+                sum.infinity = INF.NONE;
+                sum.value = that.value;
+            } else {
+                sum.infinity = INF.NONE;
+                sum.value = NumberUtility.add(this.value, that.value);
+            }
+            return sum;
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public int compareTo(Key<W> that) {
+            INF k1 = this.infinity;
+            INF k2 = that.infinity;
+            if (k1 != INF.NONE && k2 != INF.NONE && k1 == k2) return 0;
+            if (k1 == POSITIVE_INFINITY || k2 == NEGATIVE_INFINITY) return 1;
+            if (k1 == NEGATIVE_INFINITY || k2 == POSITIVE_INFINITY) return -1;
+            W a = this.value;
+            W b = that.value;
+            if (k1 == ZERO) {
+                a = (W) NumberUtility.zero(b);
+            } else if (k2 == ZERO) {
+                b = (W) NumberUtility.zero(a);
+            }
+            if (a == null || b == null) {
+                throw new IllegalArgumentException("keys cannot be null");
+            }
+            return NumberUtility.compare(a, b);
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();

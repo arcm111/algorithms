@@ -125,6 +125,7 @@ public class ShortestPath {
      */
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {
+        // Testing Bellman-Ford
         //
         //        -2     5
         //       0<------> 1
@@ -163,8 +164,7 @@ public class ShortestPath {
         G.addEdge(4, 2, 7);
         System.out.println(G);
         System.out.println("Testing Bellman-Ford: ");
-        // Should results in:
-        //
+        // results:
         //            -2      
         //      (2)0<------1(4)
         //          \     ^  
@@ -177,7 +177,8 @@ public class ShortestPath {
         //        v/       v 
         //        2(7)      3(-2)
         //            
-        //
+
+        // Testing DAG-Shortest-Path
         if (ShortestPath.bellmanFord(G, 4) == true) {
             System.out.println("No negative cycles detected.");
             for (ShortestPathVertex<Integer> v : G.getVertices()) {
@@ -244,7 +245,7 @@ public class ShortestPath {
         for (ShortestPathVertex<Integer> v : G.getVertices()) {
             System.out.println(v);
         }
-        // Testing Dijkstra
+        // results:
         //
         //        (8)  1   (9)
         //         0------->1
@@ -254,7 +255,7 @@ public class ShortestPath {
         //         |3        
         // (0)4\   |           
         //      \  |         
-        //      5\ |         .
+        //      5\ |          
         //        v|         
         //        2-------->3
         //       (5)   2   (7)
