@@ -95,15 +95,15 @@ public class ShortestPath {
      */
     private static <E extends Number, T extends VertexInterface>
             void relax(ShortestPathVertex<E> u, ShortestPathVertex<E> v, E w) {
-        if (u.infinity == ShortestPathVertex.POSITIVE_INFINITY) return;
+        if (u.d.infinity == ShortestPathVertex.POSITIVE_INFINITY) return;
         if (!triangleInequality(u, v, w)) {
-            v.setDistance(u.sumDistances(w));
+            v.setDistance(u.d.plus(w));
             v.parent = u.getVertex();
         }
     }
 
     /**
-     * Performs triangle inequality.
+     * Tests triangle inequality.
      * @param u the parent vertex
      * @param v the child vertex
      * @param w the weight of the edge (u, v)
@@ -117,7 +117,7 @@ public class ShortestPath {
         if (w == null) {
             throw new IllegalArgumentException("w cannont be null");
         }
-        return v.compareTo(u.sumDistances(w)) <= 0;
+        return v.d.compareTo(u.d.plus(w)) <= 0;
     }
 
     /**

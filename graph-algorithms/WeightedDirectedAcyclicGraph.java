@@ -1,31 +1,14 @@
 public class WeightedDirectedAcyclicGraph<T extends VertexInterface, 
-        E extends Number> extends DirectedGraph<T> {
-    private LinkedList<WeightedVertex<T, E>>[] adjVertices; // out-degree edges
-
+        E extends Number> extends WeightedDirectedGraph<T, E> {
     public WeightedDirectedAcyclicGraph(Class<T> C, int V) {
         super(C, V);
-        initAdjVertices(V);
     }
 
     public WeightedDirectedAcyclicGraph(T[] vertices) {
         super(vertices);
-        initAdjVertices(V);
     }
 
-    @SuppressWarnings("unchecked")
-    private void initAdjVertices(int n) {
-        this.adjVertices = 
-                (LinkedList<WeightedVertex<T, E>>[]) new LinkedList[n];
-        for (int i = 0; i < n; i++) {
-            adjVertices[i] = new LinkedList<>();
-        }
-    }
-    
     @Override
-    public void addEdge(int u, int v) {
-        addEdge(u, v, null);
-    }
-
     public void addEdge(int u, int v, E w) {
         validateVertex(u);
         validateVertex(v);
@@ -45,10 +28,6 @@ public class WeightedDirectedAcyclicGraph<T extends VertexInterface,
         }
         adjVertices[u].add(x);
         this.E++;
-    }
-
-    public Iterable<WeightedVertex<T, E>> adjEdges(T u) {
-        return adjVertices[u.getVertex()];
     }
 
     public static void main(String[] args) {
