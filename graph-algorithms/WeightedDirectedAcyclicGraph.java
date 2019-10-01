@@ -22,9 +22,9 @@ public class WeightedDirectedAcyclicGraph<T extends VertexInterface,
         adj[u].add(vertices[v]);
         WeightedVertex<T, E> x = new WeightedVertex<>(vertices[v], u);
         if (w == null) {
-            x.setKey(WeightedVertex.POSITIVE_INFINITY);
+            x.setWeight(WeightedVertex.POSITIVE_INFINITY);
         } else {
-            x.setKey(w);
+            x.setWeight(w);
         }
         adjVertices[u].add(x);
         this.E++;

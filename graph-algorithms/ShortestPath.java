@@ -49,7 +49,7 @@ public class ShortestPath {
         for (T u : DepthFirstSearch.topologicalSort(G)) {
             for (WeightedVertex<T, E> w : G.adjEdges(u)) {
                 T v = w.vertex;
-                relax(u, v, w.getKey());
+                relax(u, v, w.getWeight());
             }
         }
     }
@@ -62,7 +62,7 @@ public class ShortestPath {
             T u = Q.extractMin();
             for (WeightedVertex<T, E> w : G.adjEdges(u)) {
                 T v = w.vertex;
-                relax(u, v, w.getKey());
+                relax(u, v, w.getWeight());
             }
         }
     }

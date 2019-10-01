@@ -4,70 +4,84 @@
  */
 public class WeightedVertex <T extends VertexInterface, E extends Number>
        implements Comparable<WeightedVertex<T, E>> {
-    public static final INF POSITIVE_INFINITY = INF.POSITIVE;
-    public static final INF NEGATIVE_INFINITY = INF.NEGATIVE;
-    public static final INF ZERO = INF.ZERO;
+    public static final NumericKey.INF POSITIVE_INFINITY = 
+            NumericKey.INF.POSITIVE;
+    public static final NumericKey.INF NEGATIVE_INFINITY = 
+            NumericKey.INF.NEGATIVE;
+    public static final NumericKey.INF ZERO = NumericKey.INF.ZERO;
     public static final int NIL = -1;
-    public INF infinity = INF.NONE; // if weight is +inf, -inf or in between
+    public NumericKey.INF infinity = NumericKey.INF.NONE; 
     public final T vertex; // original vertex
     public int parent; // parent vertex
-    public E key; // weight
+    public NumericKey<E> weight; // weight
 
-    private static enum INF {
-        POSITIVE,
-        NEGATIVE,
-        ZERO,
-        NONE
-    }
-
+    /**
+     * Constructor.
+     * @param vertex the vertex to store
+     */
     public WeightedVertex(T vertex) {
         this.vertex = vertex;
+        this.weight = new NumericKey<>();
     }
 
+    /**
+     * Constructor.
+     * @param vertex the vertex to store
+     * @param parent the index of the parent vertex
+     */
     public WeightedVertex(T vertex, int parent) {
         this.vertex = vertex;
         this.parent = parent;
+        this.weight = new NumericKey<>();
     }
 
+    /**
+     * Constructor.
+     * @param vertex the vertex to store
+     * @param weight the weight of the vertex
+     */
     public WeightedVertex(T vertex, E key) {
         this.vertex = vertex;
-        this.key = key;
+        this.weight = new NumericKey<>(key);
     }
 
+    /**
+     * Constructor.
+     * @param vertex the vertex to store
+     * @param parent the index of the parent vertex
+     * @param weight the weight of the vertex
+     */
     public WeightedVertex(T vertex, int parent, E key) {
         this.vertex = vertex;
         this.parent = parent;
-        this.key = key;
+        this.weight = new NumericKey<>(key);
     }
 
     public int getVertex() {
         return vertex.getVertex();
     }
 
-    public E getKey() {
-        return key;
+    public NumericKey<E> getKey() {
+        return weight;
     }
 
-    public void setKey(E key) {
-        this.infinity = INF.NONE;
-        this.key = key;
+    public E getWeight() {
+        return weight.key;
     }
 
-    @SuppressWarnings("unchecked")
-    public void setKey(INF key) {
-        this.infinity = key;
-        this.key = null;
+    public void setWeight(E key) {
+        this.infinity = NumericKey.INF.NONE;
+        this.weight.setKey(key);
+    }
+
+    public void setWeight(NumericKey.INF infinity) {
+        this.infinity = infinity;
+        this.weight = null;
     }
 
     @Override
     public int compareTo(WeightedVertex<T, E> that) {
-        INF k1 = this.infinity;
-        INF k2 = that.infinity;
-        if (k1 == POSITIVE_INFINITY && k2 == POSITIVE_INFINITY) return 0;
-        if (k1 == NEGATIVE_INFINITY && k2 == NEGATIVE_INFINITY) return 0;
-        if (k1 == POSITIVE_INFINITY || k2 == NEGATIVE_INFINITY) return 1;
-        if (k1 == NEGATIVE_INFINITY || k2 == POSITIVE_INFINITY) return -1;
-        return NumberUtility.compare(this.key, that.key);
+        return this.weight.compareTo(that.weight);
     }
 
     @Override
@@ -75,12 +89,7 @@ public class WeightedVertex <T extends VertexInterface, E extends Number>
         StringBuilder s = new StringBuilder();
         s.append("v: " + getVertex());
         s.append(" -> p: " + parent);
-        String k;
-        if (infinity == POSITIVE_INFINITY) k = "positive infinity";
-        else if (infinity == NEGATIVE_INFINITY) k = "negative infinity";
-        else if (infinity == ZERO) k = "zero";
-        else k = key.toString();
-        s.append(" -> key: " + k);
+        s.append(" -> key: " + weight);
         return s.toString();
     }
 }

@@ -239,9 +239,6 @@ public class WeightedGraph<T extends VertexInterface, E extends Number>
         return Arrays.asList(vertices);
     }
 
-    /**
-     * Generates a string representation of the graph.
-     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

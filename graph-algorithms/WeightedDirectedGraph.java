@@ -53,12 +53,16 @@ public class WeightedDirectedGraph <T extends VertexInterface, E extends Number>
         validateVertex(y);
         WeightedVertex<T, E> z = new WeightedVertex<>(vertices[y], x);
         if (w == null) {
-            z.setKey(WeightedVertex.POSITIVE_INFINITY);
+            z.setWeight(WeightedVertex.POSITIVE_INFINITY);
         } else {
-            z.setKey(w);
+            z.setWeight(w);
         }
         adjVertices[x].add(z);
         this.E++;
+    }
+
+    public Iterable<WeightedVertex<T, E>> adjEdges(int u) {
+        return adjVertices[u];
     }
 
     public Iterable<WeightedVertex<T, E>> adjEdges(T u) {
@@ -95,9 +99,11 @@ public class WeightedDirectedGraph <T extends VertexInterface, E extends Number>
      */
     public List<WeightedEdge<T, E>> getEdges() {
         List<WeightedEdge<T, E>> edges = new ArrayList<>();
-        for (int u = 0; u < V; u++) {
-            for (WeightedVertex<T, E> v : adjVertices[u]) {
-                edges.add(new WeightedEdge<>(vertices[u], v.vertex, v.key));
+        for (int i = 0; i < V; i++) {
+            for (WeightedVertex<T, E> w : adjVertices[i]) {
+                T u = vertices[i];
+                T v = vertices[w.getVertex()];
+                edges.add(new WeightedEdge<>(u, v, w.getWeight()));
             }
         }
         return edges;
@@ -111,6 +117,20 @@ public class WeightedDirectedGraph <T extends VertexInterface, E extends Number>
         List<WeightedEdge<T, E>> edges = getEdges();
         Collections.sort(edges);
         return edges;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("V: " + V + ", E: " + E + "\n");
+        for (int u = 0; u < V; u++) {
+            builder.append("[" + u + "]: ");
+            for (WeightedVertex<T, E> v : adjVertices[u]) {
+                builder.append(v.getVertex() + "(" + v.getKey() + ") ");
+            }
+            if (u < V - 1) builder.append("\n");
+        }
+        return builder.toString();
     }
 
     /**
