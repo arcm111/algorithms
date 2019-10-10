@@ -18,9 +18,9 @@ public class ShortestPathVertex<E extends Number> implements VertexInterface,
             NumericKey.INF.NEGATIVE;
     public static final NumericKey.INF ZERO = NumericKey.INF.ZERO;
     public static final int NIL = -1;
-    public int vertex; // vertex
-    public int parent; // parent vertex
-    public NumericKey<E> d; // weight
+    private int vertex; // vertex
+    private int parent; // parent vertex
+    private NumericKey<E> d; // weight
 
     /**
      * Constructor.
@@ -66,6 +66,18 @@ public class ShortestPathVertex<E extends Number> implements VertexInterface,
     }
 
     /**
+     * Constructor.
+     * @param vertex the vertex index
+     * @param parent the index of the parent vertex
+     * @param d INF the distance of the vertex from the source
+     */
+    public ShortestPathVertex(int vertex, int parent, NumericKey.INF d) {
+        this.vertex = vertex;
+        this.parent = parent;
+        this.d = new NumericKey<E>(d);
+    }
+
+    /**
      * Gets the index of stored vertex.
      * @return the index as an integer.
      */
@@ -76,6 +88,18 @@ public class ShortestPathVertex<E extends Number> implements VertexInterface,
 
     public NumericKey<E> getKey() {
         return d;
+    }
+
+    public void setKey(NumericKey<E> d) {
+        this.d = d;
+    }
+
+    public int getParent() {
+        return parent;
+    }
+
+    public void setParent(int parent) {
+        this.parent = parent;
     }
 
     public E getDistance() {
@@ -92,6 +116,29 @@ public class ShortestPathVertex<E extends Number> implements VertexInterface,
 
     public void setDistance(NumericKey<E> u) {
         this.d = u;
+    }
+
+    public NumericKey<E> plus(ShortestPathVertex<E> that) {
+        return this.d.plus(that.d);
+    }
+
+    /**
+     * calculate the sum of the distance of current vertex and the given
+     * distance and return it as a {@code NumericKey}.
+     * @param key the additional distance.
+     * @return the sum of the distances.
+     */
+    public NumericKey<E> plus(NumericKey<E> key) {
+        return this.d.plus(key);
+    }
+
+    /**
+     * Compare this vertex distance to a given distance.
+     * @param key the other distance to compare to
+     * @return -1 if lesser, 1 if greater and 0 if equal
+     */
+    public int compareTo(NumericKey<E> key) {
+        return this.d.compareTo(key);
     }
 
     @Override

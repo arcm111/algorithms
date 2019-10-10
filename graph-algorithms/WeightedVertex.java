@@ -65,6 +65,10 @@ public class WeightedVertex <T extends VertexInterface, E extends Number>
         return weight;
     }
 
+    public void setKey(NumericKey<E> weight) {
+        this.weight = weight;
+    }
+
     public E getWeight() {
         return weight.key;
     }

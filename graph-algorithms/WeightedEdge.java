@@ -6,15 +6,20 @@ public class WeightedEdge<T extends VertexInterface, E extends Number>
     private final int u; // incident from
     private final int v; // incident to
     private E w; // weight
+    private NumericKey<E> weight;
     private final T sourceVertex;
     private final T dstVertex;
 
     public WeightedEdge(T sourceVertex, T dstVertex, E w) {
+        this(sourceVertex, dstVertex, new NumericKey<E>(w));
+    }
+
+    public WeightedEdge(T sourceVertex, T dstVertex, NumericKey<E> weight) {
         this.sourceVertex = sourceVertex;
         this.dstVertex = dstVertex;
         this.u = sourceVertex.getVertex();
         this.v = dstVertex.getVertex();
-        this.w = w;
+        this.weight = weight;
     }
 
     public int incidentFrom() {
@@ -34,11 +39,19 @@ public class WeightedEdge<T extends VertexInterface, E extends Number>
     }
 
     public E getWeight() {
-        return w;
+        return weight.getKey();
     }
 
     public void setWeight(E w) {
-        this.w = w;
+        this.weight.setKey(w);
+    }
+
+    public NumericKey<E> getKey() {
+        return weight;
+    }
+
+    public void setKey(NumericKey<E> weight) {
+        this.weight = weight;
     }
 
     @Override

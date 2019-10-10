@@ -39,7 +39,7 @@ public class WeightedDirectedGraph <T extends VertexInterface, E extends Number>
     
     @Override
     public void addEdge(int u, int v) {
-        addEdge(u, v, null);
+        addEdge(u, v, new NumericKey<E>(WeightedVertex.POSITIVE_INFINITY));
     }
 
     /**
@@ -52,11 +52,19 @@ public class WeightedDirectedGraph <T extends VertexInterface, E extends Number>
         validateVertex(x);
         validateVertex(y);
         WeightedVertex<T, E> z = new WeightedVertex<>(vertices[y], x);
-        if (w == null) {
-            z.setWeight(WeightedVertex.POSITIVE_INFINITY);
-        } else {
-            z.setWeight(w);
-        }
+        z.setWeight(w);
+        adjVertices[x].add(z);
+        this.E++;
+    }
+
+    /**
+     * add edge using {@code NumericKey} data-type as weight.
+     */
+    public void addEdge(int x, int y, NumericKey<E> w) {
+        validateVertex(x);
+        validateVertex(y);
+        WeightedVertex<T, E> z = new WeightedVertex<>(vertices[y], x);
+        z.setKey(w);
         adjVertices[x].add(z);
         this.E++;
     }
@@ -103,7 +111,7 @@ public class WeightedDirectedGraph <T extends VertexInterface, E extends Number>
             for (WeightedVertex<T, E> w : adjVertices[i]) {
                 T u = vertices[i];
                 T v = vertices[w.getVertex()];
-                edges.add(new WeightedEdge<>(u, v, w.getWeight()));
+                edges.add(new WeightedEdge<>(u, v, w.getKey()));
             }
         }
         return edges;

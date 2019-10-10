@@ -92,15 +92,22 @@ public class Graph<T extends VertexInterface> implements GraphInterface<T> {
 
     /**
      * Returns an iterable of the adjacecy vertices of a vertex v.
-     * @param v the vertex to get the adjacency list for.
-     * @throws IllegalArgumentException if v is invalid.
+     * @param v the vertex to get the adjacency list for
+     * @return adjacet vertices of v as an iterable
      */
     public Iterable<T> adj(T x) {
-        int v = x.getVertex();
+        return adj(x.getVertex());
+    }
+
+    /**
+     * Returns an iterable of the adjacecy vertices of a vertex v.
+     * @param v the vertex index to get the adjacency list for
+     * @throws IllegalArgumentException if v is invalid
+     */
+    public Iterable<T> adj(int v) {
         validateVertex(v);
         return adj[v];
     }
-
 
     /**
      * Adds edges to the adjacency list using indexes of the stored vertices.

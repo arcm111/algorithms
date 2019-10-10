@@ -14,6 +14,7 @@ public class NumericKey<E extends Number> implements Comparable<NumericKey<E>> {
     public static final INF POSITIVE_INFINITY = INF.POSITIVE;
     public static final INF NEGATIVE_INFINITY = INF.NEGATIVE;
     public static final INF ZERO = INF.ZERO;
+    public static final INF NONE = INF.NONE;
     public static final int NIL = -1;
     public INF infinity;
     public E key; // numeric key
@@ -94,6 +95,37 @@ public class NumericKey<E extends Number> implements Comparable<NumericKey<E>> {
             sum.setKey(that.key);
         } else {
             sum.setKey((E) NumberUtility.add(this.key, that.key));
+        }
+        return sum;
+    }
+
+    @SuppressWarnings("unchecked")
+    public NumericKey<E> minus(NumericKey<E> that) {
+        INF k1 = this.infinity;
+        INF k2 = that.infinity;
+        NumericKey<E> sum = new NumericKey<>();
+        if (k1 == ZERO && k2 == ZERO) {
+            sum.setKey(ZERO);
+        } else if (k1 == POSITIVE_INFINITY && k2 == POSITIVE_INFINITY) {
+            throw new IllegalArgumentException("Indeterminate");
+        } else if (k1 == POSITIVE_INFINITY && k2 == NEGATIVE_INFINITY) {
+            sum.setKey(POSITIVE_INFINITY);
+        } else if (k1 == NEGATIVE_INFINITY && k2 == NEGATIVE_INFINITY) {
+            throw new IllegalArgumentException("Indeterminate");
+        } else if (k1 == NEGATIVE_INFINITY && k2 == POSITIVE_INFINITY) {
+            sum.setKey(NEGATIVE_INFINITY);
+        } else if (k1 == POSITIVE_INFINITY) {
+            sum.setKey(POSITIVE_INFINITY);
+        } else if (k2 == POSITIVE_INFINITY) {
+            sum.setKey(NEGATIVE_INFINITY);
+        } else if (k2 == ZERO) {
+            sum.setKey(this.key);
+        } else if (k1 == ZERO) {
+            E b = that.key;
+            E a = (E) NumberUtility.zero(b);
+            sum.setKey((E) NumberUtility.substract(a, b));
+        } else {
+            sum.setKey((E) NumberUtility.substract(this.key, that.key));
         }
         return sum;
     }

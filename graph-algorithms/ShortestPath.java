@@ -12,19 +12,19 @@ public class ShortestPath {
      *		   Otherwise, it returns the predecessor subgraph
      */
     public static <E extends Number, T extends ShortestPathVertex<E>>
-            boolean bellmanFord(WeightedDirectedGraph<T, E> G, int s) {
+            boolean BellmanFord(WeightedDirectedGraph<T, E> G, int s) {
         initializeSingleSource(G, s);
         for (int i = 0; i < G.V(); i++) {
             for (WeightedEdge<T, E> e : G.getEdges()) {
                 T u = e.getSourceVertex();
                 T v = e.getDstVertex();
-                relax(u, v, e.getWeight());
+                relax(u, v, e.getKey());
             }
         }
         for (WeightedEdge<T, E> e : G.getEdges()) {
             T u = e.getSourceVertex();
             T v = e.getDstVertex();
-            if (!triangleInequality(u, v, e.getWeight())) {
+            if (!triangleInequality(u, v, e.getKey())) {
                 // negative weight cycle detected
                 return false;
             }
@@ -49,7 +49,7 @@ public class ShortestPath {
         for (T u : DepthFirstSearch.topologicalSort(G)) {
             for (WeightedVertex<T, E> w : G.adjEdges(u)) {
                 T v = w.vertex;
-                relax(u, v, w.getWeight());
+                relax(u, v, w.getKey());
             }
         }
     }
@@ -62,7 +62,7 @@ public class ShortestPath {
             T u = Q.extractMin();
             for (WeightedVertex<T, E> w : G.adjEdges(u)) {
                 T v = w.vertex;
-                relax(u, v, w.getWeight());
+                relax(u, v, w.getKey());
             }
         }
     }
@@ -80,7 +80,7 @@ public class ShortestPath {
                     void initializeSingleSource(W G, int s) {
         for (int i = 0; i < G.V(); i++) {
             ShortestPathVertex<E> v = G.getVertex(i);
-            v.parent = ShortestPathVertex.NIL;
+            v.setParent(ShortestPathVertex.NIL);
             v.setDistance(ShortestPathVertex.POSITIVE_INFINITY);
         }
         G.getVertex(s).setDistance(ShortestPathVertex.ZERO);
@@ -93,12 +93,15 @@ public class ShortestPath {
      * @param v the vertex
      * @param w the weight of the edge (u, v)
      */
-    private static <E extends Number, T extends VertexInterface>
-            void relax(ShortestPathVertex<E> u, ShortestPathVertex<E> v, E w) {
-        if (u.d.infinity == ShortestPathVertex.POSITIVE_INFINITY) return;
+    private static <E extends Number>
+            void relax(ShortestPathVertex<E> u, ShortestPathVertex<E> v, 
+                    NumericKey<E> w) {
+        // if (u.getKey().infinity == ShortestPathVertex.POSITIVE_INFINITY) {
+        //	return;
+        //}
         if (!triangleInequality(u, v, w)) {
-            v.setDistance(u.d.plus(w));
-            v.parent = u.getVertex();
+            v.setDistance(u.getKey().plus(w));
+            v.setParent(u.getVertex());
         }
     }
 
@@ -111,13 +114,15 @@ public class ShortestPath {
      *		   false otherwise
      * @throws IllegalArgumentException if w is null
      */
-    private static <E extends Number, T extends ShortestPathVertex<E>>
+    private static <E extends Number>
             boolean triangleInequality(ShortestPathVertex<E> u,
-                    ShortestPathVertex<E> v, E w) {
-        if (w == null) {
-            throw new IllegalArgumentException("w cannont be null");
+                    ShortestPathVertex<E> v, NumericKey<E> w) {
+        if (w.infinity == NumericKey.ZERO) {
+            return v.getKey().compareTo(u.getKey()) <= 0;
+        } else if (w.infinity != NumericKey.NONE) {
+            throw new IllegalArgumentException("weight cannont be null");
         }
-        return v.d.compareTo(u.d.plus(w)) <= 0;
+        return v.getKey().compareTo(u.getKey().plus(w)) <= 0;
     }
 
     /**
@@ -179,7 +184,7 @@ public class ShortestPath {
         //            
 
         // Testing DAG-Shortest-Path
-        if (ShortestPath.bellmanFord(G, 4) == true) {
+        if (ShortestPath.BellmanFord(G, 4) == true) {
             System.out.println("No negative cycles detected.");
             for (ShortestPathVertex<Integer> v : G.getVertices()) {
                 System.out.println(v);

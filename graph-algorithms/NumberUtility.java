@@ -28,6 +28,20 @@ public class NumberUtility {
     }
 
     /**
+     * Substract two {@code Number} type variables.
+     * @param a the first number
+     * @param b the second number
+     * @return the remainder of substracting the second number from the first
+     */
+    public static <E extends Number> Number substract(E a, E b) {
+        if (a instanceof Double) return a.doubleValue() - b.doubleValue();
+        if (a instanceof Float) return a.floatValue() - b.floatValue();
+        if (a instanceof Short) return a.shortValue() - b.shortValue();
+        if (a instanceof Long) return a.longValue() - b.longValue();
+        return a.intValue() - b.intValue();
+    }
+
+    /**
      * Returns zero value of a {@code Number} type reference.
      */
     public static <E extends Number> Number zero(E typeReference) {
