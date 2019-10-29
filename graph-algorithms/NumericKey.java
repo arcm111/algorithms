@@ -146,9 +146,17 @@ public class NumericKey<E extends Number> implements Comparable<NumericKey<E>> {
             b = (E) NumberUtility.zero(a);
         }
         if (a == null || b == null) {
+            System.out.println(k1 + " - " + k2);
             throw new IllegalArgumentException("keys cannot be null");
         }
         return NumberUtility.compare(a, b);
+    }
+
+    @SuppressWarnings("unchecked")
+    public boolean isZero() {
+        if (this.infinity == ZERO) return true;
+        E zero = (E) NumberUtility.zero(this.key);
+        return NumberUtility.compare(this.key, zero) == 0;
     }
 
     @Override
@@ -160,6 +168,19 @@ public class NumericKey<E extends Number> implements Comparable<NumericKey<E>> {
         else if (key == null) str = "null";
         else str = key.toString();
         return str;
+    }
+
+    public static void main(String[] args) {
+        NumericKey<Integer> a = new NumericKey<>(NumericKey.ZERO);
+        NumericKey<Integer> b = new NumericKey<>(0);
+        System.out.println(a.compareTo(b));
+        System.out.println(b.compareTo(a));
+        System.out.println(a.isZero());
+        System.out.println(b.isZero());
+        NumericKey<Double> d = new NumericKey<>(0.00);
+        NumericKey<Double> f = new NumericKey<>(2.00);
+        System.out.println(d.isZero());
+        System.out.println(f.isZero());
     }
 }
 

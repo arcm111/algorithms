@@ -1,7 +1,7 @@
 public class BFSVertex extends Vertex {
-    private static final int NIL = -1;
+    public static final int NIL = -1;
+    public static final BFSVertex NullVertex = new BFSVertex(NIL);
     private static final int INFINITY = Integer.MAX_VALUE;
-    private static final BFSVertex NullVertex = new BFSVertex(-1);
     public Colour colour = Colour.WHITE;
     public int d = INFINITY;
     public BFSVertex pi = NullVertex;

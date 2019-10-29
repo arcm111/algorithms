@@ -22,6 +22,14 @@ public class LinkedList<T> implements Iterable<T> {
         return head == null;
     }
 
+    public Node<T> head() {
+        return head;
+    }
+
+    public Node<T> tail() {
+        return tail;
+    }
+
     /**
      * Adds a new element to the tail of the linked-list.
      * @param w the new element to be added.
@@ -68,6 +76,17 @@ public class LinkedList<T> implements Iterable<T> {
         cur.next = head;
         this.head = cur;
         this.n++;
+    }
+
+    public LinkedList<T> union(LinkedList<T> b) {
+        if (this.head == null) {
+            this.head = b.head();
+            this.tail = b.tail();
+        } else {
+            this.tail.next = b.head();
+            this.tail = b.tail();
+        }
+        return this;
     }
 
     /**
@@ -125,5 +144,32 @@ public class LinkedList<T> implements Iterable<T> {
         public void remove() {
             throw new UnsupportedOperationException("operation not supported");
         }
+    }
+
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        Iterator<T> iter = iterator();
+        while (iter.hasNext()) {
+            builder.append(iter.next());
+            if (iter.hasNext()) builder.append("->");
+        }
+        return builder.toString();
+    }
+
+    /**
+     * Unit tests.
+     */
+    public static void main(String[] args) {
+        LinkedList<Integer> a = new LinkedList<>();
+        a.add(1);
+        a.add(4);
+        a.add(5);
+        System.out.println("a: " + a);
+        LinkedList<Integer> b = new LinkedList<>();
+        b.add(8);
+        b.add(9);
+        b.add(14);
+        System.out.println("b: " + b);
+        System.out.println("a + b: " + a.union(b));
     }
 }
