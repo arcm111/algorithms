@@ -43,7 +43,7 @@ public class ResidualNetwork<E extends Number> {
             if (!capacity[u][v].isZero()) a.add(v);
         }
         for (int w : inDegree[u]) {
-            if (!capacity[w][u].isZero()) a.add(w);
+            if (!capacity[u][w].isZero()) a.add(w);
         }
         return a;
     }

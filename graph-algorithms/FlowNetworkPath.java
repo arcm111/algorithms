@@ -1,40 +1,66 @@
-public class FlowNetworkPath <T extends VertexInterface, 
-        E extends Number> {
-    private LinkedList<T> vertices = new LinkedList<T>();
-    private LinkedList<FlowNetworkEdge<T, E>> edges = new LinkedList<>();
-    private T headVertex;
-    private T tailVertex;
+public class FlowNetworkPath <E extends Number> {
+    private LinkedList<Integer> vertices = new LinkedList<>();
+    private LinkedList<Edge<E>> edges = new LinkedList<>();
+    private int headVertex = -1;
+    private int tailVertex = -1;
 
-    public Iterable<T> getVertices() {
+    public Iterable<Integer> getVertices() {
         return vertices;
     }
 
-    public Iterable<FlowNetworkEdge<T, E>> getEdges() {
+    public Iterable<Edge<E>> getEdges() {
         return edges;
     }
 
-    public void addEdge(FlowNetworkEdge<T, E> e) {
-        if (headVertex == null) {
-            headVertex = e.sourceVertex();
-            tailVertex = e.destinationVertex();
-            this.vertices.add(headVertex);
-            this.vertices.add(tailVertex);
-            this.edges.add(e);
-        } else if (tailVertex.getVertex() != e.incidentFrom()) {
+    public void addEdge(Edge<E> e) {
+        addEdge(e.incidentFrom(), e.incidentTo(), e.getCapacity());
+    }
+
+    public void addEdge(int u, int v, NumericKey<E> c) {
+        if (headVertex == -1) {
+            headVertex = u;
+            tailVertex = v;
+            this.vertices.add(u);
+            this.vertices.add(v);
+        } else if (tailVertex != u) {
             System.out.println(tailVertex);
-            System.out.println(e);
+            System.out.println(u);
             throw new IllegalArgumentException("Invalid edge");
         } else {
-            this.tailVertex = e.destinationVertex();
-            this.vertices.add(tailVertex);
-            this.edges.add(e);
+            this.vertices.add(v);
+            this.tailVertex = v;
+        }
+        this.edges.add(new Edge<E>(u, v, c));
+    }
+
+    public static class Edge<E extends Number> {
+        private int incidentFrom;
+        private int incidentTo;
+        private NumericKey<E> capacity;
+
+        public Edge(int u, int v, NumericKey<E> c) {
+            this.incidentFrom = u;
+            this.incidentTo = v;
+            this.capacity = c;
+        }
+
+        public int incidentFrom() {
+            return incidentFrom;
+        }
+
+        public int incidentTo() {
+            return incidentTo;
+        }
+
+        public NumericKey<E> getCapacity() {
+            return capacity;
         }
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        for (FlowNetworkEdge<T, E> e : edges) {
+        for (Edge<E> e : edges) {
             builder.append(e.incidentFrom() + "--" + e.getCapacity());
             builder.append("-->" + e.incidentTo());
             builder.append(" ");

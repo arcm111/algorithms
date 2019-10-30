@@ -2,13 +2,14 @@ public class MaximumFlow {
     public static <T extends VertexInterface, E extends Number> 
             FlowNetwork<T, E>
                     EdmondsKarp(FlowNetwork<T, E> net, int s, int t) {
+        // Implement Ford-Fulkerson method and specify the augmetation method
         FordFulkerson implementation = new FordFulkerson() {
             @Override
-            protected <T extends VertexInterface, E extends Number>
-                    FlowNetworkPath<T, E> findAugmentingPath(
-                            FlowNetwork<T, E> net, int s, int t) {
-                BFSVertex[] bfsVertices = new BFSVertex[net.V()];
-                for (int i = 0; i < net.V(); i++) {
+            protected <T extends VertexInterface, E extends Number> 
+                    FlowNetworkPath<E> findAugmentingPath(
+                            ResidualNetwork<E> rnet, int s, int t) {
+                BFSVertex[] bfsVertices = new BFSVertex[rnet.V()];
+                for (int i = 0; i < rnet.V(); i++) {
                     BFSVertex x = new BFSVertex(i);
                     x.colour = BFSVertex.Colour.WHITE;
                     x.pi = BFSVertex.NullVertex;
@@ -20,37 +21,15 @@ public class MaximumFlow {
                 Q.enqueue(source);
                 while (!Q.isEmpty()) {
                     BFSVertex u = Q.dequeue();
-                    int ind = u.getVertex();
-                    for (FlowNetworkEdge<T, E> e : net.neighbours(ind)) {
-                        BFSVertex v;
-                        if (e.getCapacity().compareTo(new NumericKey<E>(NumericKey.ZERO)) == 0) {
-                            System.out.println(e);
-                            throw new IllegalArgumentException();
-                        }
-                        if (e.incidentFrom() == ind) { // outdegree edge
-                            v = bfsVertices[e.incidentTo()];
-                        } else { // indegree edge
-                            v = bfsVertices[e.incidentFrom()];
-                        }
+                    int uInd = u.getVertex();
+                    for (int vInd: rnet.neighbours(uInd)) {
+                        BFSVertex v = bfsVertices[vInd];
                         if (v.colour == BFSVertex.Colour.WHITE) {
                             v.colour = BFSVertex.Colour.GREY;
                             v.pi = u;
                             // if we reached the sink return the path
                             if (v.getVertex() == t) {
-                                Stack<FlowNetworkEdge<T, E>> stack = 
-                                        new Stack<>();
-                                BFSVertex cur = v;
-                                while (cur.getVertex() != s) {
-                                    stack.push(net.findEdge(cur.pi.getVertex(),
-                                            cur.getVertex()));
-                                    cur = cur.pi;
-                                }
-                                FlowNetworkPath<T, E> path =
-                                        new FlowNetworkPath<T, E>();
-                                for (FlowNetworkEdge<T, E> x : stack) {
-                                    path.addEdge(x);
-                                }
-                                return path;
+                                return getPath(rnet, v, s);
                             }
                             Q.enqueue(v);
                         }
@@ -59,7 +38,30 @@ public class MaximumFlow {
                 }
                 return null;
             }
+
+            private <T extends VertexInterface, E extends Number> 
+                    FlowNetworkPath<E> 
+                            getPath(ResidualNetwork<E> rn, BFSVertex x, int s) {
+                Stack<FlowNetworkPath.Edge<E>> stack = new Stack<>();
+                for (BFSVertex cur = x; cur.getVertex() != s; cur = cur.pi) {
+                    // if we reached a vertex with null parent, it means
+                    // the source vertex s does not exist in the path
+                    if (cur.getVertex() == BFSVertex.NIL) {
+                        throw new IllegalArgumentException();
+                    }
+                    int u = cur.pi.getVertex();
+                    int v = cur.getVertex();
+                    NumericKey<E> rc = rn.residualCapacity(u, v);
+                    stack.push(new FlowNetworkPath.Edge<E>(u, v, rc));
+                }
+                FlowNetworkPath<E> path = new FlowNetworkPath<>();
+                for (FlowNetworkPath.Edge<E> z : stack) {
+                    path.addEdge(z);
+                }
+                return path;
+            }
         };
+        // run Edmonds-Karp algorithm
         return implementation.maxFlow(net, s, t);
     }
 
@@ -80,21 +82,21 @@ public class MaximumFlow {
                 maxFlow(FlowNetwork<T, E> fn, int s, int t) {
             System.out.println("Flow network: ");
             System.out.println(fn);
-            FlowNetwork<T, E> rn = fn.residualNetwork();
+            ResidualNetwork<E> rn = new ResidualNetwork<>(fn);
             System.out.println("Residual network: ");
             System.out.println(rn);
-            FlowNetworkPath<T, E> p = findAugmentingPath(rn, s, t);
+            FlowNetworkPath<E> p = findAugmentingPath(rn, s, t);
             while (p != null) {
                 System.out.println("Path: " + p);
                 NumericKey<E> cp = 
                         new NumericKey<>(NumericKey.POSITIVE_INFINITY);
-                for (FlowNetworkEdge<T, E> e : p.getEdges()) {
+                for (FlowNetworkPath.Edge<E> e : p.getEdges()) {
                     if (e.getCapacity().compareTo(cp) == -1) {
                         cp = e.getCapacity();
                     }
                 }
                 System.out.println("path residual capacity: " + cp);
-                for (FlowNetworkEdge<T, E> x : p.getEdges()) {
+                for (FlowNetworkPath.Edge<E> x : p.getEdges()) {
                     int u = x.incidentFrom();
                     int v = x.incidentTo();
                     if (fn.hasEdge(u, v)) {
@@ -122,9 +124,9 @@ public class MaximumFlow {
          * @param t the sink
          * @return an augmenting path from s to t
          */
-        protected abstract <T extends VertexInterface, E extends Number>
-                FlowNetworkPath<T, E> 
-                        findAugmentingPath(FlowNetwork<T, E> net, int s, int t);
+        protected abstract <T extends VertexInterface, E extends Number> 
+                FlowNetworkPath<E> findAugmentingPath(
+                        ResidualNetwork<E> net, int s, int t);
     }
 
     /**
