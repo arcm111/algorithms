@@ -1,0 +1,63 @@
+/**
+ * Ford-Fulkerson method.
+ * It is a method rather than algorithm because the way of determining the
+ * augmenting paths is not specified.
+ */
+public abstract class FordFulkerson {
+    /**
+     * Dertemines the maximum acheivable flow in a flow network.
+     * @param fn the flow network
+     * @param s the source
+     * @param t the sink
+     * @return a flow network with maximum flow
+     */
+    public <T extends VertexInterface, E extends Number> 
+            FlowNetwork<T, E> maxFlow(FlowNetwork<T, E> fn, int s, int t) {
+        System.out.println("Flow network: ");
+        System.out.println(fn);
+        ResidualNetwork<E> rn = new ResidualNetwork<>(fn);
+        System.out.println("Residual network: ");
+        System.out.println(rn);
+        FlowNetworkPath<E> p = findAugmentingPath(rn, s, t);
+        while (p != null) {
+            System.out.println("Path: " + p);
+            NumericKey<E> cp = 
+                    new NumericKey<>(NumericKey.POSITIVE_INFINITY);
+            for (FlowNetworkPath.Edge<E> e : p.getEdges()) {
+                if (e.getCapacity().compareTo(cp) == -1) {
+                    cp = e.getCapacity();
+                }
+            }
+            System.out.println("path residual capacity: " + cp);
+            for (FlowNetworkPath.Edge<E> x : p.getEdges()) {
+                int u = x.incidentFrom();
+                int v = x.incidentTo();
+                if (fn.hasEdge(u, v)) {
+                    FlowNetworkEdge<T, E> e = fn.findEdge(u, v);
+                    e.setFlow(e.getFlow().plus(cp));
+                    rn.updateResidualCapacity(u, v, cp);
+                } else {
+                    FlowNetworkEdge<T, E> e = fn.findEdge(v, u);
+                    e.setFlow(e.getFlow().minus(cp));
+                    rn.updateResidualCapacity(v, u, cp);
+                }
+            }
+            System.out.println(fn);
+            System.out.println(rn);
+            p = findAugmentingPath(rn, s, t);
+        }
+        return fn;
+    }
+
+    /**
+     * Finds and augmenting path in the residual network.
+     * Requires implementaion.
+     * "abstract" "static" modifiers are not allowed together in java.
+     * @param net the residual network
+     * @param s the source
+     * @param t the sink
+     * @return an augmenting path from s to t
+     */
+    abstract <E extends Number> FlowNetworkPath<E> 
+            findAugmentingPath(ResidualNetwork<E> net, int s, int t);
+}

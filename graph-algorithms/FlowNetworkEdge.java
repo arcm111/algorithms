@@ -24,6 +24,11 @@ public class FlowNetworkEdge<T extends VertexInterface, E extends Number> {
         this.setCapacity(capacity);
     }
 
+    public FlowNetworkEdge(T src, T dst, NumericKey<E> capacity) {
+        this(src, dst);
+        this.setCapacity(capacity);
+    }
+
     public FlowNetworkEdge<T, E> reverse() {
         return new FlowNetworkEdge<T, E>(destinationVertex, sourceVertex);
     }

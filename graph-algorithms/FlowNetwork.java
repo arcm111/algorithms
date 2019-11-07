@@ -44,10 +44,7 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
     }
 
     public void addEdge(int u, int v, E capacity) {
-        T src = vertices[u];
-        T dst = vertices[v];
-        FlowNetworkEdge<T, E> e = new FlowNetworkEdge<>(src, dst, capacity);
-        addEdge(e);
+        addEdge(new FlowNetworkEdge<T, E>(vertices[u], vertices[v], capacity));
     }
 
     public void addEdge(FlowNetworkEdge<T, E> e) {
@@ -59,12 +56,24 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
         this.E++;
     }
 
+    public void setFlow(int u,int v, NumericKey<E> flow) {
+        this.edges[u][v].setFlow(flow);
+    }
+
+    public void setCapacity(int u,int v, NumericKey<E> capacity) {
+        this.edges[u][v].setCapacity(capacity);
+    }
+
     public int V() {
         return V;
     }
 
     public int E() {
         return E;
+    }
+
+    public T getVertex(int v) {
+        return vertices[v];
     }
 
     public boolean hasEdge(int u, int v) {
@@ -89,11 +98,11 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
         return output;
     }
 
-    public Iterable<FlowNetworkEdge<T, E>> neighbours(T u) {
-        return neighbours(u.getVertex());
+    public Iterable<FlowNetworkEdge<T, E>> neighbourEdges(T u) {
+        return neighbourEdges(u.getVertex());
     }
 
-    public Iterable<FlowNetworkEdge<T, E>> neighbours(int u) {
+    public Iterable<FlowNetworkEdge<T, E>> neighbourEdges(int u) {
         LinkedList<FlowNetworkEdge<T, E>> a = new LinkedList<>();
         NumericKey<E> zero = new NumericKey<>(NumericKey.ZERO);
         for (T v : outDegree[u]) {
@@ -124,26 +133,6 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
             a.add(w.getVertex());
         }
         return a;
-    }
-
-    public FlowNetwork<T, E> residualNetwork() {
-        FlowNetwork<T, E> residual = new FlowNetwork<>(vertices);
-        for (FlowNetworkEdge<T, E> e : getEdges()) {
-            FlowNetworkEdge<T, E> forwardEdge = new FlowNetworkEdge<>(e);
-            forwardEdge.setCapacity(e.getCapacity());
-            FlowNetworkEdge<T, E> reverseEdge = forwardEdge.reverse();
-            reverseEdge.setCapacity(new NumericKey<E>(NumericKey.ZERO));
-            residual.addEdge(forwardEdge);
-            residual.addEdge(reverseEdge);
-        }
-        return residual;
-    }
-
-    public void updateResidualCapacity(int u, int v, NumericKey<E> delta) {
-        FlowNetworkEdge<T, E> e = edges[u][v];
-        e.setCapacity(e.getCapacity().minus(delta));
-        FlowNetworkEdge<T, E> r = edges[v][u];
-        r.setCapacity(r.getCapacity().plus(delta));
     }
 
     public String toString() {
