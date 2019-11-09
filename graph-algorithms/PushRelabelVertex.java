@@ -27,8 +27,8 @@ public class PushRelabelVertex <E extends Number> implements VertexInterface {
         this.e = e;
     }
 
-    public boolean isOverflowing() {
-        return e.compareTo(new NumericKey<E>(NumericKey.ZERO)) == 1;
+    public boolean hasExcess() {
+        return e.compareTo(new NumericKey<E>(NumericKey.ZERO)) > 0;
     }
 
     @Override
