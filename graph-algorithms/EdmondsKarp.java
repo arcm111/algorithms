@@ -1,4 +1,19 @@
+/**
+ * Edmonds-Karp algorithm.
+ * An implementation of Ford-Fulkerson method using BFS for finding augmenting 
+ * paths in the residual-network. The augmenting paths are the shortest paths
+ * from source to sink in the residual-network where edges have unit weight.
+ * Running time <em>O(VE^2)</em>
+ */
 public class EdmondsKarp extends FordFulkerson {
+    /**
+     * Finds an augmenting path in residual-network using BFS.
+     * @param rnet the residual-network
+     * @param s source vertex
+     * @param t sink vertex
+     * @return an augmenting path or null if nothing was found
+     */
+    @Override
     protected <E extends Number> FlowNetworkPath<E> 
             findAugmentingPath(ResidualNetwork<E> rnet, int s, int t) {
         BFSVertex[] bfsVertices = new BFSVertex[rnet.V()];
@@ -29,9 +44,19 @@ public class EdmondsKarp extends FordFulkerson {
             }
             u.colour = BFSVertex.Colour.BLACK;
         }
+        // no augmenting paths were found
         return null;
     }
 
+    /**
+     * Constructs a path using the tail vertex and its predecessors.
+     * The tail vertex is the sink.
+     * @param rn the residual-network where the path exists
+     * @param x the tail vertex of the path
+     * @param s the source vertex which is the head of the path
+     * @return the constructed path
+     * @throws IllegalArgumentException if source vertex is not on the path
+     */
     private static <E extends Number> FlowNetworkPath<E> 
             getPath(ResidualNetwork<E> rn, BFSVertex x, int s) {
         Stack<FlowNetworkPath.Edge<E>> stack = new Stack<>();

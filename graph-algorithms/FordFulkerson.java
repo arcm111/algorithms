@@ -2,10 +2,15 @@
  * Ford-Fulkerson method.
  * It is a method rather than algorithm because the way of determining the
  * augmenting paths is not specified.
+ * Keeps augmenting flow along an augmenting path until we can't find any more 
+ * augmenting paths from source to sink. When there are no more augmenting
+ * paths available, the flow in the netword have reached its maximum value
+ * according to min-cut max-flow theorem.
+ * If capacity values are irrational then the algorithm might not terminate.
  */
 public abstract class FordFulkerson {
     /**
-     * Dertemines the maximum acheivable flow in a flow network.
+     * Runs Ford-Fulkerson method.
      * @param fn the flow network
      * @param s the source
      * @param t the sink
@@ -21,14 +26,16 @@ public abstract class FordFulkerson {
         FlowNetworkPath<E> p = findAugmentingPath(rn, s, t);
         while (p != null) {
             System.out.println("Path: " + p);
-            NumericKey<E> cp = 
-                    new NumericKey<>(NumericKey.POSITIVE_INFINITY);
+            // find residual capacity of augmenting path p
+            NumericKey<E> cp = new NumericKey<>(NumericKey.POSITIVE_INFINITY);
+            // find the critical edge on p which capacity is the lowest
             for (FlowNetworkPath.Edge<E> e : p.getEdges()) {
                 if (e.getCapacity().compareTo(cp) == -1) {
                     cp = e.getCapacity();
                 }
             }
             System.out.println("path residual capacity: " + cp);
+            // augment flow along p by cp
             for (FlowNetworkPath.Edge<E> x : p.getEdges()) {
                 int u = x.incidentFrom();
                 int v = x.incidentTo();
@@ -44,6 +51,7 @@ public abstract class FordFulkerson {
             }
             System.out.println(fn);
             System.out.println(rn);
+            // find another augmenting path
             p = findAugmentingPath(rn, s, t);
         }
         return fn;

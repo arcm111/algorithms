@@ -3,19 +3,20 @@
  * Preserves capacity constraint throughout the execution but not the 
  * flow conservation. It uses a preflow function which satisfies the capacity
  * constraint but allows the in flow to a vertex to exceeds its outflow.
+ * Running time <em>O(V^2 E)</em>.
  */
 public class PushRelabel <T extends VertexInterface, E extends Number> {
-    private final Preflow<E> preflow; // preflow function
-    private final ResidualNetwork<E> rnet; // residual network
-    private final int s; // source
-    private final int t; // sink
+    protected final Preflow<E> preflow; // preflow function
+    protected final ResidualNetwork<E> rnet; // residual network
+    protected final int s; // source
+    protected final int t; // sink
+    protected final int n;
 
     /**
      * Constructor.
      * @param net the flow network to compute the max flow for
      * @param s source vertex
      * @param t the sink vertex
-     * @return a flow network with maximum flow
      */
     public PushRelabel(FlowNetwork<T, E> net, int s, int t) {
         PushRelabelVertex<E>[] vertices = createVerticesArray(net.V());
@@ -23,6 +24,7 @@ public class PushRelabel <T extends VertexInterface, E extends Number> {
         this.rnet = new ResidualNetwork<E>(net);
         this.s = s;
         this.t = t;
+        this.n = net.V();
     }
 
     /**
@@ -65,7 +67,7 @@ public class PushRelabel <T extends VertexInterface, E extends Number> {
      * repeat until all vertices except the source and the sink have no excess
      * flow remainint.
      */
-    private Preflow<E> getMaxFlow() {
+    protected Preflow<E> getMaxFlow() {
         initializePreflow(preflow, s);
         System.out.println("preflow: ");
         System.out.println(preflow);
@@ -113,7 +115,7 @@ public class PushRelabel <T extends VertexInterface, E extends Number> {
      * source so that we can push back the remaining excess flow back to source
      * after obtaining maximum flow.
      */
-    private void initializePreflow(Preflow<E> preflow, int s) {
+    protected void initializePreflow(Preflow<E> preflow, int s) {
         for (int i = 0; i < preflow.V(); i++) {
             PushRelabelVertex<E> v = preflow.getVertex(i);
             v.setHeight(0);
@@ -152,7 +154,7 @@ public class PushRelabel <T extends VertexInterface, E extends Number> {
      * @param u vertex to push excess flow from
      * @param v vertex to push excess flow to
      */
-    private void push(int u, int v) {
+    protected void push(int u, int v) {
         // min(u.e, cf(u, v))
         NumericKey<E> df = preflow.getVertex(u).getExcessFlow();
         if (rnet.residualCapacity(u, v).compareTo(df) == -1) {
@@ -182,7 +184,7 @@ public class PushRelabel <T extends VertexInterface, E extends Number> {
      * Source and sink never change their heights from |V| and 0 respectively.
      * @param u vertex to relabel
      */
-    private void relabel(int u) {
+    protected void relabel(int u) {
         System.out.println("relabel: " + preflow.getVertex(u));
         long h = Long.MAX_VALUE;
         for (int v : rnet.neighbours(u)) {

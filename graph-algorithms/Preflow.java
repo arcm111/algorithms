@@ -1,3 +1,13 @@
+/**
+ * Preflow used in push-relabel and relabel-to-front algorithms.
+ * Very similar to a flow-network but uses a special type of vertices which
+ * maintains special properties of height and excess flow which are important
+ * for push-relabel and relabel-to-front algorithms.
+ * Another difference to flow-networks is that preflow does not satisfy the
+ * flow conservation property, instead is allows vertices to have more in-flow
+ * than out-flow, therefore, allowing them to behave as reservoirs that can 
+ * accumulate excess-flow.
+ */
 public class Preflow <E extends Number> {
     private final int V;
     private int E;
@@ -6,6 +16,11 @@ public class Preflow <E extends Number> {
     private final LinkedList<PushRelabelVertex<E>>[] inDegree;
     private final LinkedList<PushRelabelVertex<E>>[] outDegree;
 
+    /**
+     * Constructor.
+     * Initializes the preflow using edges of a given flow-network.
+     * @param fnet the flow-network for which we need to construct a preflow
+     */
     @SuppressWarnings("unchecked")
     public <T extends VertexInterface> Preflow(FlowNetwork<T, E> fnet) {
         int n = fnet.V();
@@ -27,6 +42,12 @@ public class Preflow <E extends Number> {
         this.V = n;
     }
 
+    /**
+     * Adds an edge to the preflow.
+     * @param u head vertex
+     * @param v tail vertex
+     * @param capacity edge's capacity
+     */
     public void addEdge(int u, int v, NumericKey<E> capacity) {
         edges[u][v] = new FlowNetworkEdge<>(vertices[u], vertices[v], capacity);
         inDegree[v].add(vertices[u]);
@@ -34,26 +55,55 @@ public class Preflow <E extends Number> {
         this.E++;
     }
 
+    /**
+     * Returns number of vertices in the flow-network/preflow.
+     * @return number of vertices
+     */
     public int V() {
         return V;
     }
 
+    /**
+     * Returns number of edges in the flow-network/preflow.
+     * @return number of edges
+     */
     public int E() {
         return E;
     }
 
+    /**
+     * Returns a preflow vertex at a given index.
+     * @param v the index of the vertex
+     * @return the preflow vertex
+     */
     public PushRelabelVertex<E> getVertex(int v) {
         return vertices[v];
     }
 
+    /**
+     * Checks if an edge exists in the preflow.
+     * @param u the head vertex
+     * @param v the tail vertex
+     * @return true if the edge exists, otherwise, false
+     */
     public boolean hasEdge(int u, int v) {
         return edges[u][v] != null;
     }
 
+    /**
+     * Finds a returns an edge in the preflow.
+     * @param u the head vertex
+     * @param v the tail veretx
+     * @return the edge if found or null if does not exist
+     */
     public FlowNetworkEdge<PushRelabelVertex<E>, E> findEdge(int u, int v) {
         return edges[u][v];
     }
 
+    /**
+     * Returns a list of all edges in the preflow as an iterable.
+     * @return preflow edges
+     */
     public Iterable<FlowNetworkEdge<PushRelabelVertex<E>, E>> getEdges() {
         LinkedList<FlowNetworkEdge<PushRelabelVertex<E>, E>> output = 
                 new LinkedList<>();
@@ -65,11 +115,21 @@ public class Preflow <E extends Number> {
         return output;
     }
 
+    /**
+     * Returns edges incident of a given vertex.
+     * @param u the vertex to find in-degree and out-degree edges for
+     * @return list of edges as an iterable
+     */
     public Iterable<FlowNetworkEdge<PushRelabelVertex<E>, E>> 
             neighbourEdges(PushRelabelVertex<E> u) {
         return neighbourEdges(u.getVertex());
     }
 
+    /**
+     * Returns edges incident of a given vertex.
+     * @param u vertex index for which to find in-degree and out-degree edges 
+     * @return list of edges as an iterable
+     */
     public Iterable<FlowNetworkEdge<PushRelabelVertex<E>, E>> 
             neighbourEdges(int u) {
         LinkedList<FlowNetworkEdge<PushRelabelVertex<E>, E>> a = 
@@ -92,10 +152,20 @@ public class Preflow <E extends Number> {
         return a;
     }
 
+    /**
+     * Return adjacent vertices for a given vertex.
+     * @param u the vertex for which to find adjacent vertices
+     * @return adjacent vertices as an iterable
+     */
     public Iterable<Integer> neighbourVertices(PushRelabelVertex<E> u) {
         return neighbourVertices(u.getVertex());
     }
 
+    /**
+     * Return adjacent vertices for a given vertex.
+     * @param u index of the vertex for which to find adjacent vertices
+     * @return adjacent vertices as an iterable
+     */
     public Iterable<Integer> neighbourVertices(int u) {
         LinkedList<Integer> a = new LinkedList<>();
         for (PushRelabelVertex<E> v : outDegree[u]) {
@@ -107,6 +177,10 @@ public class Preflow <E extends Number> {
         return a;
     }
 
+    /**
+     * Returns a string representation of the preflow.
+     * @return string representation
+     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -115,13 +189,16 @@ public class Preflow <E extends Number> {
             for (PushRelabelVertex<E> v : outDegree[i]) {
                 NumericKey<E> c = edges[i][v.getVertex()].getCapacity();
                 NumericKey<E> f = edges[i][v.getVertex()].getFlow();
-                builder.append(v + "[" + f + "/" + c + "]");
+                builder.append(v + "[" + f + "/" + c + "] ");
             }
             builder.append("\n");
         }
         return builder.toString();
     }
 
+    /**
+     * Unit tests.
+     */
     public static void main(String[] args) {
         Vertex[] vertices = new Vertex[6];
         for (int i = 0; i < 6; i++) vertices[i] = new Vertex(i);

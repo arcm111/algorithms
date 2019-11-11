@@ -1,9 +1,28 @@
+/**
+ * Residual network.
+ * Maintains values of how much more flow can we push through each edge in
+ * the relative flow network either in the forward direction (increasing flow) 
+ * or in the reverse direction (decreasing or cancelling flow on the forward 
+ * edge).
+ * Anti-parallel edges are allowed and used to store residual-capacity of 
+ * reverse-edges (not existed in original flow-network) of all flow-network 
+ * edges. These residual-capacities are used to cancel(decrease) flow.
+ * The only edges of original flow-network that exists in the residual-network
+ * are those who can admit more flow (residual-capacity greater than 0).
+ * <em>Residual capacity cf(u,v) of an edge (u,v) is equal to:</em>
+ *     c(u,f) - f(u,v)  {if (u,v) exists in the flow-network}
+ *     f(u,v)           {if (u,v) does not exist in the flow-network}
+ */
 public class ResidualNetwork<E extends Number> {
-    private int V;
-    private NumericKey<E>[][] capacity;
-    private LinkedList<Integer>[] inDegree;
-    private LinkedList<Integer>[] outDegree;
+    private int V; // number of vertices in flow-network
+    private NumericKey<E>[][] capacity; // residual capacity matrix
+    private LinkedList<Integer>[] inDegree; // in-degree vertices
+    private LinkedList<Integer>[] outDegree; // out-degree vertices
 
+    /** 
+     * Constructor.
+     * @param fnet the flow-network for which to create the residual-network.
+     */
     public ResidualNetwork(FlowNetwork<?, E> fnet) {
         init(fnet.V());
         for (FlowNetworkEdge<?, E> e : fnet.getEdges()) {
@@ -16,6 +35,10 @@ public class ResidualNetwork<E extends Number> {
         }
     }
 
+    /**
+     * Initializes the residual-network.
+     * @param n the number of vertices in the network
+     */
     @SuppressWarnings("unchecked")
     private void init(int n) {
         this.inDegree = (LinkedList<Integer>[]) new LinkedList[n];
@@ -29,14 +52,29 @@ public class ResidualNetwork<E extends Number> {
         this.V = n;
     }
 
+    /**
+     * Returns the number of vertices in the network.
+     * @return the number of vertices
+     */
     public int V() {
         return V;
     }
 
+    /**
+     * Returns the residual-capacity of an edge.
+     * @param u the head vertex
+     * @param v the tail vertex
+     * @return residual capacity of (u,v)
+     */
     public NumericKey<E> residualCapacity(int u, int v) {
         return capacity[u][v];
     }
 
+    /**
+     * Returns adjacent vertices on non-zero residual-capacities edges.
+     * @param u the vertex
+     * @return adjacent vertices
+     */
     public Iterable<Integer> neighbours(int u) {
         LinkedList<Integer> a = new LinkedList<>();
         for (int v : outDegree[u]) {
@@ -48,11 +86,25 @@ public class ResidualNetwork<E extends Number> {
         return a;
     }
 
+    /**
+     * Updates residual-capacities of forward and reverse edges according to
+     * additional amount of flow added to the network edge.
+     * Decreases residual capacity of forward edge and increases it for the
+     * reverse edge by the same amount delta.
+     * @param u the head vertex
+     * @param v the tail vertex
+     * @param delta the amount of extra flow pushed from u to v
+     */
     public void updateResidualCapacity(int u, int v, NumericKey<E> delta) {
         capacity[u][v] = capacity[u][v].minus(delta);
         capacity[v][u] = capacity[v][u].plus(delta);
     }
 
+    /**
+     * Returns a string representation of the residual-netwrok.
+     * @return the string representation
+     */
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         for (int u = 0; u < V; u++) {
@@ -71,6 +123,9 @@ public class ResidualNetwork<E extends Number> {
         return builder.toString();
     }
 
+    /**
+     * Unit tests.
+     */
     public static void main(String[] args) {
         Vertex[] vertices = new Vertex[6];
         for (int i = 0; i < 6; i++) vertices[i] = new Vertex(i);

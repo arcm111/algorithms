@@ -1,3 +1,31 @@
+/**
+ * Flow Network.
+ * A flow network is basically a directed graph whose edges have non-negative
+ * weights called capacity in addition to another non-negative weights called
+ * flow that must not exceed capacity.
+ * Anti-parallel edges (such as (u, v) and (v, u)) are not allowed.
+ * Self-loops are not allowed.
+ * For every vertex in the network there is a path fron source to sink passing
+ * through it. Therfore, the network is a connected graph.
+ * <em>The flow in the network must satisfies two properties</em>:
+ *   1- Capacity constraint: {@code 0 <= flow <= capacity}
+ *   2- Flow conservation: for each vertex, flow in = flow out
+ * A cut in a netwrok is partitioning of vertices into two disjoint subsets, S
+ * containing the source s and the T contains the sink t.
+ * Net-flow f(S, T) across a cut (S, T) is the flow from S to T minus the flow
+ * in the reverse direction from T to S.
+ * The capacity of a cut (S, T) is the sum of the capacities of all edges
+ * going from S to T.
+ * The value of any flow in the network is less than the capacity of any cut.
+ * A mimimum cut in a flow network is a cut whose capacity is mimimum over
+ * all cuts of the network.
+ * The net-flow of a minimum-cut is the maximum flow of a network.
+ * <em>Max-flow min-cut theorem</em>:
+ * For a network with flow f, source s and sink t, the following are equivalent:
+ *   1- f is maximum flow.
+ *   2- The residual network has no augmenting paths.
+ *   3- For some cut (S, T) the capacity of the cut equals the flow value.
+ */
 public class FlowNetwork<T extends VertexInterface, E extends Number> {
     private int V;
     private int E;
@@ -6,11 +34,20 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
     private LinkedList<T>[] inDegree;
     private LinkedList<T>[] outDegree;
 
+    /**
+     * Constructor.
+     * @param rawVertices the network vertices
+     */
     public FlowNetwork(T[] rawVertices) {
         init(rawVertices.length);
         this.vertices = rawVertices;
     }
 
+    /**
+     * Constructor.
+     * Builds a flow-network from a weighted-directed-graph.
+     * @param G the weighted-directed-graph
+     */
     public <W extends WeightedDirectedGraph<T, E>> FlowNetwork(W G) {
         init(G.V());
         int i = 0;
@@ -29,6 +66,10 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
         }
     }
 
+    /**
+     * Initializes the flow-network.
+     * @param n number of vertices
+     */
     @SuppressWarnings("unchecked")
     private void init(int n) {
         this.inDegree = (LinkedList<T>[]) new LinkedList[n];
@@ -43,10 +84,20 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
         this.V = n;
     }
 
+    /**
+     * adds a flow-edge to the network.
+     * @param u vertex which the edge is incident from
+     * @param v vertex which the edge is incident to
+     * @param capacity the edge capacity
+     */
     public void addEdge(int u, int v, E capacity) {
         addEdge(new FlowNetworkEdge<T, E>(vertices[u], vertices[v], capacity));
     }
 
+    /**
+     * adds a flow-edge to the network.
+     * @param e flow-edge
+     */
     public void addEdge(FlowNetworkEdge<T, E> e) {
         int u = e.incidentFrom();
         int v = e.incidentTo();
@@ -56,38 +107,84 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
         this.E++;
     }
 
+    /**
+     * Sets flow value for a certain edge.
+     * @param u vertex which the edge is incident from
+     * @param v vertex which the edge is incident to
+     * @param flow the edge's flow vlue
+     */
     public void setFlow(int u,int v, NumericKey<E> flow) {
         this.edges[u][v].setFlow(flow);
     }
 
-    public void setCapacity(int u,int v, NumericKey<E> capacity) {
+    /**
+     * Sets capacity value for a certain edge.
+     * @param u vertex which the edge is incident from
+     * @param v vertex which the edge is incident to
+     * @param capacity the edge's capacity vlue
+     */
+    public void setCapacity(int u, int v, NumericKey<E> capacity) {
         this.edges[u][v].setCapacity(capacity);
     }
 
+    /**
+     * Returns the number of vertices in the network.
+     * @return number of vertices
+     */
     public int V() {
         return V;
     }
 
+    /**
+     * Returns the number of edges in the network.
+     * @return number of edges
+     */
     public int E() {
         return E;
     }
 
+    /**
+     * Returns a stored network vertex at a given index.
+     * @param v vertex index
+     * @return network vertex
+     */
     public T getVertex(int v) {
         return vertices[v];
     }
 
+    /**
+     * Checks if an edge exists in the network.
+     * @param u vertex which the edge is incident from
+     * @param v vertex which the edge is incident to
+     * @return true if edge exits, otherwise, false.
+     */
     public boolean hasEdge(int u, int v) {
         return edges[u][v] != null;
     }
 
+    /**
+     * Checks if an edge exists in the network.
+     * @param e flow-network edge
+     * @return true if edge exits, otherwise, false.
+     */
     public boolean hasEdge(FlowNetworkEdge<T, E> e) {
         return edges[e.incidentFrom()][e.incidentTo()] != null;
     }
 
+    /**
+     * Finds and return an edge in the network.
+     * @param u vertex which the edge is incident from
+     * @param v vertex which the edge is incident to
+     * @return the edge if existed, otherwise, null
+     */
     public FlowNetworkEdge<T, E> findEdge(int u, int v) {
         return edges[u][v];
     }
 
+    /**
+     * Returns a list of all edges in the network as iterable.
+     * @return network edges
+     */
     public Iterable<FlowNetworkEdge<T, E>> getEdges() {
         LinkedList<FlowNetworkEdge<T, E>> output = new LinkedList<>();
         for (int u = 0; u < V; u++) {
@@ -98,10 +195,20 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
         return output;
     }
 
+    /**
+     * Returns list of incoming and outgoing edges for a given vertex.
+     * @param u incident vertex
+     * @return adjacent edges
+     */
     public Iterable<FlowNetworkEdge<T, E>> neighbourEdges(T u) {
         return neighbourEdges(u.getVertex());
     }
 
+    /**
+     * Returns list of incoming and outgoing edges for a given vertex.
+     * @param u index of incident vertex
+     * @return adjacent edges
+     */
     public Iterable<FlowNetworkEdge<T, E>> neighbourEdges(int u) {
         LinkedList<FlowNetworkEdge<T, E>> a = new LinkedList<>();
         NumericKey<E> zero = new NumericKey<>(NumericKey.ZERO);
@@ -120,10 +227,22 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
         return a;
     }
 
+    /**
+     * Returns adjacent vertices incident to incoming and outgoing edges of
+     * a given vertex as iterable.
+     * @param u the incident source vertex
+     * @return adjacent vertices
+     */
     public Iterable<Integer> neighbourVertices(T u) {
         return neighbourVertices(u.getVertex());
     }
 
+    /**
+     * Returns adjacent vertices incident to incoming and outgoing edges of
+     * a given vertex as iterable.
+     * @param u the index of the incident source vertex
+     * @return adjacent vertices
+     */
     public Iterable<Integer> neighbourVertices(int u) {
         LinkedList<Integer> a = new LinkedList<>();
         for (T v : outDegree[u]) {
@@ -135,6 +254,11 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
         return a;
     }
 
+    /**
+     * Returns a string representaion of the flow-network.
+     * @return flow-network as a string representaion
+     */
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < V; i++) {
@@ -149,6 +273,9 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
         return builder.toString();
     }
 
+    /**
+     * Unit tests.
+     */
     public static void main(String[] args) {
         Vertex[] vertices = new Vertex[6];
         for (int i = 0; i < 6; i++) vertices[i] = new Vertex(i);
