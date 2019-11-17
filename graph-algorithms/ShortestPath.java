@@ -1,3 +1,6 @@
+/**
+ * Single-path shortest-path algorithms.
+ */
 public class ShortestPath {
     /**
      * Bellman-Ford algorithm.
@@ -5,7 +8,13 @@ public class ShortestPath {
      * <p>Allows negative weight edges but no negative weight cycles.
      * <p>Can detect negative weight cycles.
      * <p>Relaxes each edge V - 1 times.
+     * <p>By the path-relaxation property, at the end of the algorithm, all
+     * paths from the source s to all other vertices are shortest paths. This
+     * is because for any path p(s, v0, v1, ..., vk, v) all edges in the path
+     * ((s,v0), (v0,v1), ..., (vk,v)) would have been relaxed at least once
+     * when the algorithm terminates.
      * <p>Running time is <em>O(EV)</em>.
+     *
      * @param G the weighted directed graph
      * @param s the source vertex
      * @return null if the graph contians negative weight cycles
@@ -34,11 +43,12 @@ public class ShortestPath {
 
     /**
      * DAG-Shortest-Path Single source Shortest Path algorithm.
-     * <p>Works only on directed weighted acyclic graphs which is a requirement
-     * in itself for topological sorting used in the algorithm.
+     * <p>Works only on directed weighted acyclic graphs which (being acyclic)
+     * is a requirement in itself for topological sorting used in the algorithm.
      * <p>Negative edges are allowed but no positive or negative cycles.
      * <p>Relaxes each edge only once.
      * <p>Running time <em>O(V + E)</em>
+     *
      * @param G the graph to perform the algorithm on
      * @param s source vertex to use to find shortest paths to other vertices
      */
@@ -54,6 +64,22 @@ public class ShortestPath {
         }
     }
 
+    /**
+     * Dijkstra algorithm.
+     * <p>Maintains a set S of vertices whom shortest-paths from the source 
+     * have already been determined. The algorithm repeatedly selects a vertex
+     * not in S and with minimum shortest-path estimate, adds it to S, then
+     * relaxes all its outgoing edges.
+     * <p>Negative edges are not allowed.
+     * <p>Uses a proiority queue for selecting vertices with minimum weights.
+     * <p>Running time depends on the queue implementation:
+     *    - using a simple array = <em>O(V^2 + E)</em>
+     *    - using minimum-heap priority-queue = <em>O(ElogV)</em>
+     *    - using Fibonacci-heap = <em>O(VlgV + E)</em>
+     *
+     * @param G the graph to perform the algorithm on
+     * @param s source vertex to use to find shortest paths to other vertices
+     */
     public static <E extends Number, T extends ShortestPathVertex<E>> 
                 void Dijkstra(WeightedDirectedGraph<T, E> G, int s) {
         initializeSingleSource(G, s);

@@ -1,8 +1,11 @@
 /**
  * Push-relabel algorithm for computing maximum flow.
+ * It gradually converts preflow into maximum flow by moving flow locally
+ * between neighbouring vertices through push and relabel operations until
+ * all excess flow in all vertices is exhausted.
  * Preserves capacity constraint throughout the execution but not the 
  * flow conservation. It uses a preflow function which satisfies the capacity
- * constraint but allows the in flow to a vertex to exceeds its outflow.
+ * constraint but allows the in-flow to a vertex to exceeds its out-flow.
  * Running time <em>O(V^2 E)</em>.
  */
 public class PushRelabel <T extends VertexInterface, E extends Number> {

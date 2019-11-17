@@ -25,9 +25,9 @@ import java.util.Iterator;
  * there exits no vertex v such that (v,u) is an admissible edge, and therefore,
  * no vertex can precede u in the list.
  * <p>An edge (u,v) is <em>admissible</em> if it has a non-zero residual 
- * capacity and u.h = v.h + 1. If u is overflowing we push excess flow to v,
- * if there are no admissible-edges incident on (entering) u, however, we 
- * relabel u.
+ * capacity and u.h = v.h + 1. If u is overflowing we push excess flow to v.
+ * If u is overflowing but there are no admissible-edges incident on u, however,
+ * we relabel u.
  * Running time <em>O(V^3)</em>.
  */
 public class RelabelToFront <T extends VertexInterface, E extends Number>

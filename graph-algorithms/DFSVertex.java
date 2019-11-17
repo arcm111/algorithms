@@ -1,10 +1,10 @@
 public class DFSVertex extends Vertex {
     public static final int NIL = -1;
     public static final DFSVertex NullVertex = new DFSVertex(-1);
-    public Colour colour = Colour.WHITE;
-    public DFSVertex pi = NullVertex;
-    public int d = NIL;
-    public int f = NIL;
+    public Colour colour = Colour.WHITE; // vertex colour
+    public DFSVertex pi = NullVertex; // parent vertex
+    public int d = NIL; // discovery time
+    public int f = NIL; // finishing time
 
     public static enum Colour {
         WHITE,

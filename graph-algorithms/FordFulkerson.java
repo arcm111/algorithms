@@ -2,10 +2,9 @@
  * Ford-Fulkerson method.
  * It is a method rather than algorithm because the way of determining the
  * augmenting paths is not specified.
- * Keeps augmenting flow along an augmenting path until we can't find any more 
- * augmenting paths from source to sink. When there are no more augmenting
- * paths available, the flow in the netword have reached its maximum value
- * according to min-cut max-flow theorem.
+ * Augments flow along augmenting paths until there are no more augmenting 
+ * paths from source to sink, at which point the network flow would have 
+ * reached its maximum value (by min-cut max-flow theorem).
  * If capacity values are irrational then the algorithm might not terminate.
  */
 public abstract class FordFulkerson {

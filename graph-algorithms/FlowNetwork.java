@@ -31,8 +31,8 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
     private int E;
     private T[] vertices;
     private FlowNetworkEdge<T, E>[][] edges;
-    private LinkedList<T>[] inDegree;
-    private LinkedList<T>[] outDegree;
+    private LinkedList<T>[] incomingEdges;
+    private LinkedList<T>[] outgoingEdges;
 
     /**
      * Constructor.
@@ -62,7 +62,7 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
             x.setCapacity(e.getKey());
             x.setFlow(new NumericKey<E>(NumericKey.ZERO));
             edges[u][v] = x;
-            outDegree[u].add(vertices[v]);
+            outgoingEdges[u].add(vertices[v]);
         }
     }
 
@@ -72,12 +72,12 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
      */
     @SuppressWarnings("unchecked")
     private void init(int n) {
-        this.inDegree = (LinkedList<T>[]) new LinkedList[n];
-        this.outDegree = (LinkedList<T>[]) new LinkedList[n];
+        this.incomingEdges = (LinkedList<T>[]) new LinkedList[n];
+        this.outgoingEdges = (LinkedList<T>[]) new LinkedList[n];
         this.edges = (FlowNetworkEdge<T, E>[][]) new FlowNetworkEdge[n][n];
         for (int i = 0; i < n; i++) {
-            this.inDegree[i] = new LinkedList<T>();
-            this.outDegree[i] = new LinkedList<T>();
+            this.incomingEdges[i] = new LinkedList<T>();
+            this.outgoingEdges[i] = new LinkedList<T>();
             this.edges[i] = (FlowNetworkEdge<T, E>[]) new FlowNetworkEdge[n];
         }
         this.vertices = (T[]) new VertexInterface[n];
@@ -102,8 +102,8 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
         int u = e.incidentFrom();
         int v = e.incidentTo();
         edges[u][v] = e;
-        inDegree[v].add(vertices[u]);
-        outDegree[u].add(vertices[v]);
+        incomingEdges[v].add(vertices[u]);
+        outgoingEdges[u].add(vertices[v]);
         this.E++;
     }
 
@@ -188,7 +188,7 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
     public Iterable<FlowNetworkEdge<T, E>> getEdges() {
         LinkedList<FlowNetworkEdge<T, E>> output = new LinkedList<>();
         for (int u = 0; u < V; u++) {
-            for (T v : outDegree[u]) {
+            for (T v : outgoingEdges[u]) {
                 output.add(edges[u][v.getVertex()]);
             }
         }
@@ -212,13 +212,13 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
     public Iterable<FlowNetworkEdge<T, E>> neighbourEdges(int u) {
         LinkedList<FlowNetworkEdge<T, E>> a = new LinkedList<>();
         NumericKey<E> zero = new NumericKey<>(NumericKey.ZERO);
-        for (T v : outDegree[u]) {
+        for (T v : outgoingEdges[u]) {
             FlowNetworkEdge<T, E> e = edges[u][v.getVertex()];
             if (e.getCapacity().compareTo(zero) == 1) {
                 a.add(e);
             }
         }
-        for (T w : inDegree[u]) {
+        for (T w : incomingEdges[u]) {
             FlowNetworkEdge<T, E> e = edges[u][w.getVertex()];
             if (e.getCapacity().compareTo(zero) == 1) {
                 a.add(e);
@@ -245,13 +245,22 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
      */
     public Iterable<Integer> neighbourVertices(int u) {
         LinkedList<Integer> a = new LinkedList<>();
-        for (T v : outDegree[u]) {
+        for (T v : outgoingEdges[u]) {
             a.add(v.getVertex());
         }
-        for (T w : inDegree[u]) {
+        for (T w : incomingEdges[u]) {
             a.add(w.getVertex());
         }
         return a;
+    }
+
+    public Iterable<FlowNetworkEdge<T, E>> outEdges(int uInd) {
+        LinkedList<FlowNetworkEdge<T, E>> out = new LinkedList<>();
+        for (T v : outgoingEdges[uInd]) {
+            int vInd = v.getVertex();
+            out.add(edges[uInd][vInd]);
+        }
+        return out;
     }
 
     /**
@@ -263,7 +272,7 @@ public class FlowNetwork<T extends VertexInterface, E extends Number> {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < V; i++) {
             builder.append("[" + i + "]: ");
-            for (T v : outDegree[i]) {
+            for (T v : outgoingEdges[i]) {
                 NumericKey<E> c = edges[i][v.getVertex()].getCapacity();
                 NumericKey<E> f = edges[i][v.getVertex()].getFlow();
                 builder.append(v.getVertex() + "(" + f + "/" + c + ") ");

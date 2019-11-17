@@ -2,7 +2,7 @@
  * Edmonds-Karp algorithm.
  * An implementation of Ford-Fulkerson method using BFS for finding augmenting 
  * paths in the residual-network. The augmenting paths are the shortest paths
- * from source to sink in the residual-network where edges have unit weight.
+ * from source to sink in the residual-network where edges have unit weights.
  * Running time <em>O(VE^2)</em>
  */
 public class EdmondsKarp extends FordFulkerson {

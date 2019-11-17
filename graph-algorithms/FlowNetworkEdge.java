@@ -73,11 +73,15 @@ public class FlowNetworkEdge<T extends VertexInterface, E extends Number> {
         this.flow = flow;
     }
 
+    public boolean hasFlow() {
+        return flow.compareTo(new NumericKey<E>(NumericKey.ZERO)) > 0;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append(incidentFrom + "--" + flow + "/" + capacity);
-        builder.append("-->" + incidentTo);
+        builder.append(incidentFrom + "--(" + flow + "/" + capacity);
+        builder.append(")-->" + incidentTo);
         return builder.toString();
     }
 }

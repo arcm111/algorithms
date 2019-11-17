@@ -16,11 +16,15 @@ public class AllPairsShortestPath {
      * in a graph contains at most |V| vertices). The expansion occurs during 
      * the relaxation process.
      * <p>It works simillarly to running Bellman-Ford |V| times in parallel.
-     * Bellman-Ford expands shortest paths |V| times for a certain source until
-     * all optimal shortest-paths are computed, while this algorithm expands 
-     * all shortest paths one extra edge at a time for all sources, then 
-     * repeats the process until all optimal shortest-paths are computed 
-     * for every source vertex in the graph. Source:
+     * <p>Bellman-ford starts with a signle shortest path and expands it one 
+     * edge at a time |V| times until the shortest-path is optimal. This 
+     * algorithm, however, uses list of source vertices containing all vertices 
+     * in the graph, it expands all shortest-paths from the first source by only
+     * one edge, then moves to next source in the list and repeat the process, 
+     * until all shortest-paths from every source in the list have been expanded
+     * by exactly one edge. Then it moves back to the beginning of the list
+     * and repeats the process until it finds optimum shortest-paths from every
+     * source to every other vertex in the graph. Source:
      * {@link https://cs.stackexchange.com/questions/115521/}.
      * <p>The running time is <em>O(V^4)</em>.
      *
@@ -114,8 +118,7 @@ public class AllPairsShortestPath {
      * into two paths: path(i,k) and path(k,j) containing {1,2,...,k-1}
      * intermediate vertices. The shortest-paths (i,k) and (k,j) has already
      * been computed and memoized in previous steps, therefore, we can use
-     * their values to expand the shortest path(i,j) by relaxing it if
-     * {@code shortest-path(i,j) > shortest-path(i,k) + shortest-path(k,j)}.
+     * these values to expand the shortest path(i,j) by relaxation.
      * <p>The running time is <em>O(V^3)</em>.
      *
      * @param G the graph to run the algorithm on
@@ -153,15 +156,20 @@ public class AllPairsShortestPath {
 
     /**
      * Johnson's algorithm.
-     * Reweights all negative edges into non-negative weighted edges using
+     * <p>Reweights all negative edges into non-negative weighted edges using
      * a weighting function that preserves shortest-paths; that is a
      * shortest-path (i,j) using original weighting functions is also a
      * shortest-path using the new reweighting function. Then it performs
      * Dijkstra's algorithm for every source vertex in the graph.
      * Reweight function: new-weight(u,v) = old-weight(u,v) + 
      * old-shortest-path(u) - old-shortest-path(v)
-     * <p>The running time is <em>O(VE.lgV)</em> using priority queue, and
-     * <em>O(V^2 lgV + EV)</em> using a Fibonacci heap.
+     * <p>Reweighting function (produces non-negative weights):
+     *     w'(u,v) = w(u,v) + h(u) - h(v)
+     *     where h(x) is the sortest path to x found using bellman-ford
+     * <p>The running time depends on the queue implementation in Dijkstra's
+     * algorithm:
+     *     - <em>O(VE lgV)</em> using priority queue.
+     *     - <em>O(V^2 lgV + EV)</em> using a Fibonacci heap.
      *
      * @param G the graph to run the algorithm on
      * @return all-pairs shortest-paths as a matrix (two dimensional array)
@@ -236,8 +244,12 @@ public class AllPairsShortestPath {
 
     /**
      * Transitive closure.
-     * For each pair of vertices in a graph G determine if there exits a path
+     * <p>For each pair of vertices in a graph G determine if there exits a path
      * between these two vertices.
+     * <p>It uses Floyd-Warshal but replaces arithmetic operators (+) and (min)
+     * for logical operators (and) and (or) respectively.
+     * <p>Running time is <em>O(V^3)</em>
+     *
      * @param the graph to run the algorithm on
      * @return boolean matrix containing transitive closure values
      */
