@@ -36,12 +36,11 @@ public class LinearProgramming {
         int[] N = new int[n];
         int[] B = new int[m];
         for (int i = 0; i < n; i++) N[i] = i + 1;
-        for (int i = 0; i < n; i++) B[i] = n + i + 1;
-        double v = 0;
+        for (int i = 0; i < m; i++) B[i] = n + i + 1;
 
         // make sure the system is feasible and produce a slack form for
         // which the basic solution is feasible
-        initialiseSimplex(A, b, c, N, B);
+        double v = initialiseSimplex(A, b, c, N, B);
 
         // keep pivoting until an optimal solution is found
         while (true) {
@@ -171,7 +170,7 @@ public class LinearProgramming {
             }
             l = minimumRatioTest(delta, Baux);
             int lInd = index(Baux, l);
-            if (Double.isInfinite(delta[l])) {
+            if (Double.isInfinite(delta[lInd])) {
                 throw new IllegalArgumentException("Unbounded");
             }
             vaux = pivot(Naux, Baux, Laux, baux, caux, vaux, l, e);
@@ -439,6 +438,50 @@ public class LinearProgramming {
         v = 0;
         for (int i = 0; i < A.length; i++) v += c[i] * x[i];
         System.out.println("v: " + v);
+        System.out.println("--------------------\n");
+
+        // simplex test 2
+        A = new double[][] {{-2, -7.5, -3}, {-20, -5, -10}};
+        b = new double[] {-10000, -30000};
+        c = new double[] {-1, -1, -1};
+        x = LinearProgramming.simplex(A, b, c);
+        printArray("solution", x);
+        v = 0;
+        for (int i = 0; i < A.length; i++) v += c[i] * x[i];
+        System.out.println("v: " + v);
+        System.out.println("--------------------\n");
+
+        // simplex test 3 "basic solution is not feasible"
+        A = new double[][] {{1, -1}, {-1, -1}, {-1, 4}};
+        b = new double[] {8, -3, 2};
+        c = new double[] {1, 3, 0};
+        x = LinearProgramming.simplex(A, b, c);
+        printArray("solution", x);
+        v = 0;
+        for (int i = 0; i < A.length; i++) v += c[i] * x[i];
+        System.out.println("v: " + v);
+        System.out.println("--------------------\n");
+
+        // simplex test 4 "infeasible (3xrow1 + row2 --> x1 <= 0)"
+        A = new double[][] {{1, 2}, {-2, -6}, {0, 1}};
+        b = new double[] {4, -12, 1};
+        c = new double[] {1, -2};
+        try {
+            x = LinearProgramming.simplex(A, b, c);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        System.out.println("--------------------\n");
+
+        // simplex test 5 "unbounded"
+        A = new double[][] {{-1, 1}, {-1, -1}, {-1, 4}};
+        b = new double[] {-1, -3, 2};
+        c = new double[] {1, 3};
+        try {
+            x = LinearProgramming.simplex(A, b, c);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         System.out.println("--------------------\n");
     }
 }
