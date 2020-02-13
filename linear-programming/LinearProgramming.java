@@ -462,7 +462,7 @@ public class LinearProgramming {
         System.out.println("v: " + v);
         System.out.println("--------------------\n");
 
-        // simplex test 4 "infeasible (3xrow1 + row2 --> x1 <= 0)"
+        // simplex test 4 "infeasible"
         A = new double[][] {{1, 2}, {-2, -6}, {0, 1}};
         b = new double[] {4, -12, 1};
         c = new double[] {1, -2};
