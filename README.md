@@ -1,1 +1,1 @@
-# algorithms
+# Java implementation of CLRS algorithms.
