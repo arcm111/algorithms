@@ -2,16 +2,16 @@
  * A <b>polynomial</b> in the variable x over an algebric feild F represents a 
  * function {@code A(x) = sum_j=0^n-1 ajx^j} where {@code a0, a1, ..., an-1}
  * are the <b>coefficients</b> of the polynomail, and the polynomial has a 
- * <b>degree</b> of {@code n - 1} and a <b>bound-degree</b>.
+ * <b>degree</b> of {@code n - 1} and a <b>bound-degree</b> {@code n}.
  * Polynomials can be represented mainly in two forms: <b>coefficients form</b>
  * and <b>point-value</b> form.
- * In coefficients form, ddition and evaluation(Horner's rule) takes 
+ * In coefficients form, addition and evaluation(Horner's rule) takes 
  * <em>THETA(n)</em> and multiplication takes <em>THETA(n^2)</em>. While in
  * point-value form, addition and multiplication takes <em>THETA(n)</em> and
  * <b>interpolation</b>(inverse of evaluation) takes <em>THETA(n^2)</em> using
  * lagrange's formula.
  * Evaluating and interpolating polynomials takes THETA(n^2) using normal 
- * methods, however, if we use comple roots of unity we can perform these 
+ * methods, however, if we use complex roots of unity we can perform these 
  * operations in <em>THETA(nlgn)</em> time using the fast Fourier transform 
  * FFT algorithm.
  */
@@ -26,7 +26,7 @@ public class Polynomials {
      * <em>THETA(nlgn)</em> time.
      * 
      * @param a the polynomial coefficients
-     * @return point-value form at the n complex nth roots of unity
+     * @return point-value form evaluated at the n complex nth roots of unity
      * @throws IllegalArgumentException if n is not a power of 2
      */
     public static ComplexNumber[] FFT_recursive(double[] a) {
@@ -65,8 +65,8 @@ public class Polynomials {
      * representation using inverse FFT algorithm.
      * Runs in <em>THETA(nlgn)</em>.
      *
-     * @param y the y components vector of the n point-value points evaluated
-     *			at the n complex nth roots of unity
+     * @param y the y coordinates vector of the n point-value points where
+     *			the x coordinates are the n complex nth roots of unity
      * @return the coefficients vector of the polynomial
      * @throws IllegalArgumentException if n is not a power of 2
      */
@@ -83,8 +83,8 @@ public class Polynomials {
      * The results are scalled by n.
      * Runs in <em>THETA(nlgn)</em> time.
      *
-     * @param y the y components vector of the n point-value points evaluated
-     *			at the n complex nth roots of unity
+     * @param y the y coordinates vector of the n point-value points where
+     *			the x coordinates are the n complex nth roots of unity
      * @return the coefficients vector of the polynomial
      * @throws IllegalArgumentException if n is not a power of 2
      */
@@ -144,7 +144,7 @@ public class Polynomials {
     }
 
     /**
-     * An iterative form of FFT algorithm which improves on the running time
+     * An iterative form of FFT algorithm which improves the running time
      * of the recursive approach by lowering the constant hidden in the 
      * THETA-notation.
      * Uses bottom-up approach instead of top-down used in recursive algorithm.
@@ -180,9 +180,9 @@ public class Polynomials {
     }
 
     /**
-     * Computes the logarithm base 2 of an integer.
+     * Computes logarithm base 2 of an integer.
      * @param n the integer
-     * @return the logarithm base 2 as an integer
+     * @return the logarithm base 2 of n
      */
     private static int log(int n) {
         return (int) (Math.log(n) / Math.log(2));
@@ -191,7 +191,7 @@ public class Polynomials {
     /**
      * Rearranges the polynomial coefficients in an array by their 
      * reversed-bits order.
-     * The total number of bits is {@code lgn} where n is the size of the array.
+     * The total number of bits is {@code lgn} where n is the array's size.
      * For example if n = 8 and x = 001(1) then reversed-bits x is 100(4).
      * n must be a power of 2 otherwise the bit-reversed indexes might become
      * out of array's bounds.
