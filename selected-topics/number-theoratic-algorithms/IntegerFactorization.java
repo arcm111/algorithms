@@ -3,7 +3,7 @@ import java.util.Random;
 /**
  * Finds factors of a prime n.
  * Factoring a large integer n seems to be much more difficult than determining
- * whether n is a prime of a composite.
+ * whether n is a prime or a composite.
  */
 public class IntegerFactorization {
     /**
@@ -18,6 +18,7 @@ public class IntegerFactorization {
      * operations where p is the smallest prime factor of n.
      *
      * @param n the integer to factorise
+     * @return first discovered factor or -1 if non was found
      */
     public static int pollardRho(int n) {
         Random rand = new Random();
