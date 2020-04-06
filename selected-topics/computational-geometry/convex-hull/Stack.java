@@ -7,7 +7,7 @@ import java.util.Iterator;
  * Compatible with foreach by implemention of {@code Iterable} interface.
  */
 public class Stack<T> implements Iterable<T> {
-    private Node<T> top = null;
+    protected Node<T> top = null;
     private int n = 0;
 
     /**
@@ -64,7 +64,7 @@ public class Stack<T> implements Iterable<T> {
      * Helper node class used in the stack.
      * Contains a pointer to the next element only.
      */
-    private class Node<T> {
+    protected class Node<T> {
         public final T item;
         public Node<T> next;
 
