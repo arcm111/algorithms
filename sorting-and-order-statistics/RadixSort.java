@@ -4,12 +4,12 @@ import java.util.Random;
 /**
  * Radix sort algorithm.
  * Requries a stable digit sorting algorithm in order to work correctly.
- * Stable.
+ * Not stable.
  * Not in place.
  * Does not make effective use of hardware caches like quicksort.
  * Running time <em>O(d(n+k))</em> where d is the number of digits, k is the
  * Space complexity <em>O(n+k)</em> (allocated during counting-sort).
- * radix and n is the size of the array.
+ * k is the radix and n is the size of the array.
  */
 public class RadixSort {
     /**
